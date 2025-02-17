@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'application'
 }
 
 group = 'com.musement'
@@ -19,9 +20,18 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // Добавляем поддержку JPA
+	implementation 'org.hibernate:hibernate-core:6.0.0.Final'  // Подключаем Hibernate (если не идет в комплекте с Spring Data JPA)
+
+	implementation 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+application {
+	mainClass = 'com.musement.backend.MusementBackendApplication'
+}
+
 
 tasks.named('test') {
 	useJUnitPlatform()
