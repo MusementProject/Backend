@@ -6,10 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/")
-public class HomeController {
+@RequestMapping("/user")
+public class UserController {
+
     @GetMapping
-    public String home() {
-        return "Musement server is running";
+    public User user(){
+        return new User("Anna");
     }
 }
