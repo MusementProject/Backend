@@ -11,6 +11,6 @@ public class UserController {
 
     @GetMapping
     public User user(){
-        return new User("Anna");
+        return new User("Boris");
     }
 }
