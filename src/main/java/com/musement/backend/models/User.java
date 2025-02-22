@@ -21,4 +21,13 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "full_name")
+    private String fullName;
+
+    @Column(name = "profile_picture")
+    private String profilePicture;
 }
