@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -30,4 +32,13 @@ public class User {
 
     @Column(name = "profile_picture")
     private String profilePicture;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_concerts",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "concert_id")
+    )
+    private Set<Concert> attendingConcerts;
+
 }

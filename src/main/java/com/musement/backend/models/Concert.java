@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "concerts")
@@ -16,6 +17,9 @@ public class Concert {
     private Long id;
 
     @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
     private String artist;
 
     @Column(nullable = false)
@@ -23,4 +27,7 @@ public class Concert {
 
     @Column(nullable = false)
     private LocalDateTime date;
+
+    @ManyToMany(mappedBy = "attendingConcerts")
+    private Set<User> attendees;
 }

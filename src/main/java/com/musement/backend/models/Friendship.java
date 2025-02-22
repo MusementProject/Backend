@@ -16,7 +16,7 @@ public class Friendship {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = false)
     private User user;      // who sent the request
 
     @ManyToOne
