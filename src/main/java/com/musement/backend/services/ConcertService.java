@@ -7,10 +7,13 @@ import com.musement.backend.models.User;
 import com.musement.backend.repositories.ArtistRepository;
 import com.musement.backend.repositories.ConcertRepository;
 import com.musement.backend.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ConcertService {
@@ -32,12 +35,40 @@ public class ConcertService {
         return getConcertOrThrow(id);
     }
 
+    public Set<User> getAttendees(Long id) {
+        return getConcertOrThrow(id).getAttendees();
+    }
+
+    public boolean isUserAttendingConcert(Long concertId, Long userId) {
+        Concert concert = getConcertOrThrow(concertId);
+        User user = getUserOrThrow(userId);
+
+        return concert.getAttendees().contains(user);
+    }
+
+    public List<Concert> getConcertsByAttendee(Long userId) {
+        return concertRepository.findByAttendee(userId);
+    }
+
+    /**
+     * Search concerts by location and date range
+     */
+    public List<Concert> searchConcerts(String location, LocalDate dateFrom, LocalDate dateTo) {
+        return concertRepository.findByFilters(location, dateFrom, dateTo);
+    }
+
     public Concert createConcert(Concert concert) {
         return concertRepository.save(concert);
     }
 
     public void deleteConcert(Long id) {
-        concertRepository.deleteById(id);
+        Concert concert = getConcertOrThrow(id);
+
+        for (User attendee : concert.getAttendees()) {
+            attendee.getAttendingConcerts().remove(concert);
+            userRepository.save(attendee);
+        }
+        concertRepository.delete(concert);
     }
 
     public Concert updateConcert(Long id, ConcertUpdateDTO dto) {
@@ -55,8 +86,12 @@ public class ConcertService {
     public Concert addAttendeeToConcert(Long concertId, Long userId) {
         User user = getUserOrThrow(userId);
         Concert concert = getConcertOrThrow(concertId);
+
         user.getAttendingConcerts().add(concert);
         concert.getAttendees().add(user);
+
+        userRepository.save(user);
+        concertRepository.save(concert);
         return concert;
     }
 
@@ -64,24 +99,28 @@ public class ConcertService {
     public Concert removeAttendeeFromConcert(Long concertId, Long userId) {
         User user = getUserOrThrow(userId);
         Concert concert = getConcertOrThrow(concertId);
+
         user.getAttendingConcerts().remove(concert);
         concert.getAttendees().remove(user);
+
+        userRepository.save(user);
+        concertRepository.save(concert);
         return concert;
     }
 
     private Concert getConcertOrThrow(Long id) {
         return concertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Concert with id " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Concert with id " + id + " not found."));
     }
 
     private User getUserOrThrow(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User with id " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found."));
     }
 
     private Artist getArtistOrThrow(Long id) {
         return artistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Artist with id " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Artist with id " + id + " not found."));
     }
 }
 
