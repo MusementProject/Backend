@@ -51,4 +51,22 @@ public class UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
+
+    /**
+     * Returns a list of users whose username contains the given username.
+     *
+     * @param username part of Username to search for
+     * @return List of users
+     */
+    public List<User> searchByUsername(String username) {
+        return userRepository.findUserByUsernameContainingIgnoreCase(username);
+    }
+
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findUserByEmail(email);
+    }
 }
