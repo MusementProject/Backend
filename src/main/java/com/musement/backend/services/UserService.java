@@ -4,6 +4,8 @@ import com.musement.backend.dto.UserUpdateDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +41,13 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User with id " + id + " not found."));
 
+        // TODO: add this check (cur.user == user) everywhere
+
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!user.getUsername().equals(currentUsername)) {
+            throw new AccessDeniedException("You are not allowed to update this user");
+        }
+
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getFullName() != null) user.setFullName(dto.getFullName());
@@ -50,5 +59,23 @@ public class UserService {
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    /**
+     * Returns a list of users whose username contains the given username.
+     *
+     * @param username part of Username to search for
+     * @return List of users
+     */
+    public List<User> searchByUsername(String username) {
+        return userRepository.findUserByUsernameContainingIgnoreCase(username);
+    }
+
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findUserByEmail(email);
     }
 }

@@ -5,6 +5,7 @@ import com.musement.backend.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.musement.backend.dto.UserUpdateDTO;
 import java.util.List;
 
 @RestController
@@ -28,8 +29,38 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{email}")
+    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+        return userService.getUserByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.createUser(user));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO user) {
+        return ResponseEntity.ok(userService.updateUser(id, user));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/searchByUsername")
+    public List<User> searchUsersByUsername(@RequestParam String username) {
+        return userService.searchByUsername(username);
     }
 }

@@ -19,6 +19,9 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // spring-boot-starter-security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     runtimeOnly 'org.postgresql:postgresql'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -27,7 +30,20 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // spring boot security test
+    testImplementation 'org.springframework.security:spring-security-test'
 }
+
+test {
+    doFirst {
+        def agentJar = configurations.testRuntimeClasspath.find { it.name.contains("byte-buddy-agent") }
+        if (agentJar) {
+            jvmArgs "-javaagent:${agentJar.absolutePath}"
+        }
+    }
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()
