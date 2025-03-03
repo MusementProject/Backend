@@ -4,6 +4,8 @@ import com.musement.backend.dto.UserUpdateDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +40,13 @@ public class UserService {
     public User updateUser(Long id, UserUpdateDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User with id " + id + " not found."));
+
+        // TODO: add this check (cur.user == user) everywhere
+
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!user.getUsername().equals(currentUsername)) {
+            throw new AccessDeniedException("You are not allowed to update this user");
+        }
 
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
