@@ -13,6 +13,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -20,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class UserServiceTest {
-    //    private UserService userService;
     private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -29,7 +30,9 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
-        userService = new UserService(userRepository);
+        passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+        userService = new UserService(userRepository, passwordEncoder);
 
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("currentUser", "password"));

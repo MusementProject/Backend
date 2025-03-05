@@ -1,11 +1,11 @@
 package com.musement.backend.controllers;
 
+import com.musement.backend.dto.UserUpdateDTO;
 import com.musement.backend.models.User;
 import com.musement.backend.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.musement.backend.dto.UserUpdateDTO;
 import java.util.List;
 
 @RestController
@@ -22,21 +22,21 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{email}")
+    @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email)
                 .map(ResponseEntity::ok)
@@ -53,7 +53,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/id/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();

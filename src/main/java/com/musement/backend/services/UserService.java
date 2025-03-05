@@ -6,6 +6,7 @@ import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,9 +15,11 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> getAllUsers() {
@@ -34,6 +37,8 @@ public class UserService {
         if (userRepository.findUserByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists.");
         }
+        String encryptedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
         return userRepository.save(user);
     }
 
