@@ -1,12 +1,19 @@
 package com.musement.backend.services;
 
+import com.musement.backend.dto.UserUpdateDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
-
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -14,13 +21,27 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class UserServiceTest {
-    private UserService userService;
     private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private UserService userService;
 
     @BeforeEach
     void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
-        userService = new UserService(userRepository);
+        passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+        userService = new UserService(userRepository, passwordEncoder);
+
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("currentUser", "password"));
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     /**
@@ -111,5 +132,49 @@ class UserServiceTest {
 
         userService.deleteUser(user.getId());
         verify(userRepository, times(1)).deleteById(user.getId());
+    }
+
+
+    /**
+     * Test that the updateUser() method updates the user's email successfully.
+     */
+    @Test
+    public void testUpdateUserSuccess() {
+        Long userId = 1L;
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setUsername("currentUser"); // matches the current authenticated user
+        existingUser.setEmail("old@example.com");
+
+        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        updateDTO.setEmail("new@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateUser(userId, updateDTO);
+
+        assertEquals("new@example.com", updatedUser.getEmail());
+        verify(userRepository).save(existingUser);
+    }
+
+    /**
+     * Test that the updateUser() method throws an AccessDeniedException
+     * when the user tries to update another user's data.
+     */
+    @Test
+    public void testUpdateUserAccessDenied() {
+        Long userId = 1L;
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setUsername("otherUser"); // does not match the current authenticated user
+        existingUser.setEmail("old@example.com");
+
+        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        updateDTO.setEmail("new@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+
+        assertThrows(AccessDeniedException.class, () -> userService.updateUser(userId, updateDTO));
     }
 }
