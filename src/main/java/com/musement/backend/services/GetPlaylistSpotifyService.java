@@ -38,8 +38,8 @@ public class GetPlaylistSpotifyService {
      *
      * @param playlistUrl - ссылка на плейлист
      * @return объект PlaylistFromSpotifyDTO:
-     * - title: название плейлиста
-     * - artist: список исполнителей (каждый встречается столько раз, сколько его песен в плейлисте,
+     * - title (String): название плейлиста
+     * - artist (Artist): список исполнителей (каждый встречается столько раз, сколько его песен в плейлисте,
      * т.е. надо просто из джейсона вытащить из каждого трека исполнителя)
      */
     public PlaylistFromSpotifyDTO getPlaylistFromSpotify(String playlistUrl) {
@@ -65,12 +65,12 @@ public class GetPlaylistSpotifyService {
     }
 
     /**
-     * Подсчитывает количество вхождений каждого артиста в плейлисте
-     * и обновляет агрегированную статистику для пользователя.
+     * Calculate artist statistics for the given playlist
+     * and update the database.
      *
-     * @param playlistUrl Ссылка на плейлист в Spotify.
-     * @param userId      Идентификатор пользователя.
-     * @return Список с данными: идентификатор артиста, имя и счетчик вхождений.
+     * @param playlistUrl Link to the playlist.
+     * @param userId      User id.
+     * @return List of ArtistStatisticsDTO.
      */
     @Transactional
     public List<ArtistStatisticsDTO> calculateArtistStatistics(String playlistUrl, Long userId) {

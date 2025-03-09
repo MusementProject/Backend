@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -39,6 +40,6 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "concert_id")
     )
-    private Set<Concert> attendingConcerts;
+    private Set<Concert> attendingConcerts = new HashSet<>();
 
 }

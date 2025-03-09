@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -65,7 +66,10 @@ public class ConcertService {
         Concert concert = getConcertOrThrow(id);
 
         for (User attendee : concert.getAttendees()) {
-            attendee.getAttendingConcerts().remove(concert);
+            // remove concert from user's attending concerts
+            Set<Concert> attendingConcerts = new HashSet<>(attendee.getAttendingConcerts());
+            attendingConcerts.remove(concert);
+            attendee.setAttendingConcerts(attendingConcerts);
             userRepository.save(attendee);
         }
         concertRepository.delete(concert);
