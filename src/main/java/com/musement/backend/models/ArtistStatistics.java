@@ -5,22 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "playlist_songs")
 @Getter
 @Setter
-public class PlaylistSong {
+@Table(name = "artist_statistics")
+public class ArtistStatistics {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "playlist_id", nullable = false)
-    private Playlist playlist;
-
-    @Column(nullable = false)
-    private String title;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "artist_id", nullable = false)
     private Artist artist;
+
+    @Column(nullable = false)
+    private Integer counter;
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
 
 @Entity
 @Table(name = "playlists")
@@ -22,7 +21,6 @@ public class Playlist {
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
-    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL)
-    private Set<PlaylistSong> songs;
-
+    @Column(nullable = false, name = "playlist_url")
+    private String playlistUrl;
 }

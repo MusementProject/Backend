@@ -37,5 +37,13 @@ public class ArtistService {
         artistRepository.deleteById(id);
     }
 
-
+    public Artist findOrCreateArtist(String name) {
+        Optional<Object> artistOpt = artistRepository.findArtistByName(name);
+        if (artistOpt.isPresent()) {
+            return (Artist) artistOpt.get();
+        }
+        Artist artist = new Artist();
+        artist.setName(name);
+        return artistRepository.save(artist);
+    }
 }
