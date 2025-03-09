@@ -1,4 +1,4 @@
-package com.musement.backend;
+package com.musement.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.musement.backend.dto.UserUpdateDTO;
