@@ -2,6 +2,7 @@ package com.musement.backend.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
 @Table(name = "artists")
 @Getter
 @Setter
+@RequiredArgsConstructor
 public class Artist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +28,8 @@ public class Artist {
 
     @OneToMany(mappedBy = "artist", cascade = CascadeType.ALL)
     private Set<Concert> concerts;
+
+    public Artist(String name){
+        this.name = name;
+    }
 }
