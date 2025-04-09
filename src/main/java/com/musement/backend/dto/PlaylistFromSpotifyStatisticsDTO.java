@@ -15,5 +15,5 @@ import java.util.Map;
 @AllArgsConstructor
 public class PlaylistFromSpotifyStatisticsDTO {
     private String name;
-    private Map<Artist, Integer> playlist_statistics;
+    private Map<Artist, Integer> playlistStatistics;
 }

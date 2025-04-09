@@ -2,7 +2,7 @@ package com.musement.backend.services;
 
 import com.musement.backend.dto.LoginRequestDTO;
 import com.musement.backend.dto.LoginResponseDTO;
-import com.musement.backend.exceptions.WrondPasswordException;
+import com.musement.backend.exceptions.WrongPasswordException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,18 +14,18 @@ public class LoginService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    public LoginService(PasswordEncoder passwordEncoder, UserRepository userRepository, UserRepository userRepository1) {
-        this.userRepository = userRepository1;
+    public LoginService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public LoginResponseDTO login(LoginRequestDTO request)
-            throws UsernameNotFoundException, WrondPasswordException {
+            throws UsernameNotFoundException, WrongPasswordException {
         User user = userRepository.findUserByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new WrondPasswordException("Wrong password");
+            throw new WrongPasswordException("Wrong password");
         }
         // TODO generate JWT token
 

@@ -1,10 +1,7 @@
 package com.musement.backend.controllers;
 
 import com.musement.backend.dto.ArtistStatisticsDTO;
-import com.musement.backend.dto.PlaylistFromSpotifyDTO;
-import com.musement.backend.dto.SpotifyInfo.Playlist;
-import com.musement.backend.exceptions.UserNotFoundException;
-import com.musement.backend.services.GetPlaylistSpotifyService;
+import com.musement.backend.services.SpotifyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,15 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/playlists")
-public class GetPlaylistSpotifyController {
+public class SpotifyController {
 
-    private final GetPlaylistSpotifyService getPlaylistSpotifyService;
+    private final SpotifyService getPlaylistSpotifyService;
 
-    public GetPlaylistSpotifyController(GetPlaylistSpotifyService getPlaylistSpotifyService){
+    public SpotifyController(SpotifyService getPlaylistSpotifyService) {
         this.getPlaylistSpotifyService = getPlaylistSpotifyService;
     }
 

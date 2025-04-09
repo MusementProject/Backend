@@ -1,5 +1,6 @@
 package com.musement.backend.services;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.musement.backend.config.SpotifyConfig;
 import com.musement.backend.dto.ArtistStatisticsDTO;
 import com.musement.backend.dto.PlaylistFromSpotifyDTO;
@@ -27,7 +28,7 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 
 @Service
-public class GetPlaylistSpotifyService {
+public class SpotifyService {
     private final ArtistService artistService;
     private final UserService userService;
     private final UserRepository userRepository;
@@ -41,13 +42,16 @@ public class GetPlaylistSpotifyService {
     @Setter
     @Component
     public static class SpotifyAuthInfo {
-        private String access_token;
-        private String token_type;
-        private int expires_in;
+        @JsonProperty("access_token")
+        private String accessToken;
+        @JsonProperty("token_type")
+        private String tokenType;
+        @JsonProperty("expires_in")
+        private int expiresIn;
     }
 
 
-    public GetPlaylistSpotifyService(
+    public SpotifyService(
             ArtistService artistService,
             UserService userService,
             UserRepository userRepository,
@@ -72,7 +76,7 @@ public class GetPlaylistSpotifyService {
      */
     public Optional<PlaylistFromSpotifyDTO> getPlaylistFromSpotify(String playlistId, String playlistTitle) {
         Optional<Playlist> response = getPlaylistInfo(playlistId);
-        if (response.isEmpty()){
+        if (response.isEmpty()) {
             return Optional.empty();
         }
         Playlist playlist = response.get();
@@ -96,16 +100,16 @@ public class GetPlaylistSpotifyService {
         return Optional.of(dto);
     }
 
-    private Mono<Playlist> sendRequestForPlaylist(String playlistId){
+    private Mono<Playlist> sendRequestForPlaylist(String playlistId) {
         return webClient
                 .get()
                 .uri("/v1/playlists/{playlistId}/tracks", playlistId)
-                .header("Authorization", "Bearer " + authInfo.getAccess_token())
+                .header("Authorization", "Bearer " + authInfo.getAccessToken())
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
-                    if (clientResponse.statusCode().equals(HttpStatusCode.valueOf(401))){
+                    if (clientResponse.statusCode().equals(HttpStatusCode.valueOf(401))) {
                         throw new ExpiredSpotifyTokenException();
-                    }else{
+                    } else {
                         throw new SpotifyAPIException(clientResponse.toString());
                     }
                 })
@@ -120,10 +124,10 @@ public class GetPlaylistSpotifyService {
         try {
             response = sendRequestForPlaylist(playlistId).block();
             return Optional.of(response);
-        } catch(ExpiredSpotifyTokenException exception){
+        } catch (ExpiredSpotifyTokenException exception) {
             getNewAuthToken();
             return getPlaylistInfo(playlistId);
-        } catch (SpotifyAPIException | SpotifyServerException exception){
+        } catch (SpotifyAPIException | SpotifyServerException exception) {
             return Optional.empty();
         }
     }
@@ -142,9 +146,9 @@ public class GetPlaylistSpotifyService {
                 .retrieve()
                 .bodyToMono(SpotifyAuthInfo.class).block();
         if (response != null) {
-            authInfo.setAccess_token(response.getAccess_token());
-            authInfo.setToken_type(response.getToken_type());
-            authInfo.setExpires_in(response.getExpires_in());
+            authInfo.setAccessToken(response.getAccessToken());
+            authInfo.setTokenType(response.getTokenType());
+            authInfo.setExpiresIn(response.getExpiresIn());
         }
     }
 
@@ -152,8 +156,8 @@ public class GetPlaylistSpotifyService {
      * Calculate artist statistics for the given playlist
      * and update the database.
      *
-     * @param userId      User id.
-     * @param playlistId Link to the playlist.
+     * @param userId        User id.
+     * @param playlistId    Link to the playlist.
      * @param playlistTitle playlist title
      * @return List of ArtistStatisticsDTO.
      */
@@ -163,7 +167,7 @@ public class GetPlaylistSpotifyService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Optional<PlaylistFromSpotifyDTO> playlist = getPlaylistFromSpotify(playlistId, playlistTitle);
-        if (playlist.isEmpty()){
+        if (playlist.isEmpty()) {
             return Optional.empty();
         }
         PlaylistFromSpotifyDTO playlistInfo = playlist.get();
