@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // allow all requests to the root path
                         .requestMatchers("/").permitAll()
+                        .requestMatchers("/api/login/**").permitAll()
+                        .requestMatchers("/api/register/**").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
