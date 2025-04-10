@@ -55,7 +55,9 @@ public class SpotifyService {
             ArtistService artistService,
             UserService userService,
             UserRepository userRepository,
-            ArtistStatisticsRepository artistStatisticsRepository, WebClient webClient, SpotifyConfig config) {
+            ArtistStatisticsRepository artistStatisticsRepository,
+            WebClient webClient,
+            SpotifyConfig config) {
         this.artistService = artistService;
         this.userService = userService;
         this.userRepository = userRepository;
