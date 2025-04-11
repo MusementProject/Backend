@@ -28,7 +28,7 @@ public class SecurityConfig {
     @Autowired
     private GoogleTokenAuthenticationFilter googleTokenAuthenticationFilter;
 
-
+    @Autowired
     private UserRepository userRepository;
 
     @Bean

@@ -1,12 +1,11 @@
 package com.musement.backend.controllers;
 
 import com.musement.backend.dto.ArtistStatisticsDTO;
+import com.musement.backend.dto.SpotifyPlaylistRequest;
 import com.musement.backend.services.SpotifyService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -21,9 +20,9 @@ public class SpotifyController {
         this.getPlaylistSpotifyService = getPlaylistSpotifyService;
     }
 
-    @GetMapping("/add/{userId}/{playlistId}/{playlistTitle}")
-    public List<ArtistStatisticsDTO> getPlaylist(@PathVariable Long userId, @PathVariable String playlistId, @PathVariable String playlistTitle) {
-        return getPlaylistSpotifyService.calculateArtistStatistics(userId, playlistId, playlistTitle)
+    @PostMapping("/add")
+    public List<ArtistStatisticsDTO> getPlaylist(@Valid @RequestBody SpotifyPlaylistRequest request) {
+        return getPlaylistSpotifyService.calculateArtistStatistics(request.getUserId(), request.getPlaylistId(), request.getPlaylistTitle())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Playlist not found"));
     }
 }

@@ -41,7 +41,7 @@ public class LoginController {
     }
 
     @PostMapping("/google")
-    public ResponseEntity<LoginResponseDTO> loginWithGoogle(@RequestBody LoginGoogleRequestDTO request){
+    public ResponseEntity<LoginResponseDTO> loginWithGoogle(@Valid @RequestBody LoginGoogleRequestDTO request){
         String token = request.getToken();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
@@ -58,6 +58,7 @@ public class LoginController {
                 String name = tokenPayload.get("name").toString();
 
                 LoginResponseDTO response = loginService.loginGoogleUser(googleUserId, email, name);
+                response.setToken(token);
                 System.out.println(googleConfig.getClientId());
                 return ResponseEntity.ok(response);
             }
