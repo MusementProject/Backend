@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,4 +27,7 @@ public class Artist {
     private String type;
     @JsonProperty("uri")
     private String uri;
+
+    @JsonProperty("images")
+    private List<Image> images;
 }

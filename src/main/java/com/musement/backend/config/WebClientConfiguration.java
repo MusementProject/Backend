@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfiguration {
     private static final String BASE_URL = "https://api.spotify.com";
-    public static final int TIMEOUT = 1000;
+    public static final int TIMEOUT = 20000;
 
     @Bean
     public WebClient webClientWithTimeout(){

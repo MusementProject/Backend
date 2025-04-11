@@ -88,12 +88,16 @@ public class SpotifyService {
         for (PlaylistTrackObject trackObject : playlist.getItems()) {
             for (com.musement.backend.dto.SpotifyInfo.Artist artistSpotify : trackObject.getTrack().getArtists()) {
                 String artistName = artistSpotify.getName();
-                Artist artist = new Artist();
+                com.musement.backend.models.Artist artist = artistService.findOrCreateArtist(artistName);
 
-                Long artistId = artistService.findOrCreateArtist(artistName).getId();
-                artist.setId(artistId);
-
-                artist.setName(artistName);
+                if (artist.getImageUrl() == null || artist.getImageUrl().isEmpty()) {
+                    com.musement.backend.dto.SpotifyInfo.Artist fullArtist = fetchFullArtist(artistSpotify.getId());
+                    if (fullArtist.getImages() != null && !fullArtist.getImages().isEmpty()) {
+                        String imageUrl = fullArtist.getImages().get(0).getUrl();
+                        artist.setImageUrl(imageUrl);
+                        artistService.updateArtist(artist);
+                    }
+                }
                 artists.add(artist);
             }
         }
@@ -119,6 +123,20 @@ public class SpotifyService {
                     throw new SpotifyServerException(clientResponse.toString());
                 })
                 .bodyToMono(Playlist.class);
+    }
+
+    private com.musement.backend.dto.SpotifyInfo.Artist fetchFullArtist(String spotifyArtistId) {
+        try {
+            return webClient
+                    .get()
+                    .uri("/v1/artists/{id}", spotifyArtistId)
+                    .header("Authorization", "Bearer " + authInfo.getAccessToken())
+                    .retrieve()
+                    .bodyToMono(com.musement.backend.dto.SpotifyInfo.Artist.class)
+                    .block();
+        } catch (Exception e) {
+            return new com.musement.backend.dto.SpotifyInfo.Artist();
+        }
     }
 
     public Optional<Playlist> getPlaylistInfo(String playlistId) {
