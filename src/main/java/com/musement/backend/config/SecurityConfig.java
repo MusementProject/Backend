@@ -3,6 +3,7 @@ package com.musement.backend.config;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -22,6 +24,12 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Autowired
+    private GoogleTokenAuthenticationFilter googleTokenAuthenticationFilter;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Bean
     public SecurityFilterChain web(HttpSecurity http) throws Exception {
@@ -47,6 +55,7 @@ public class SecurityConfig {
                         // other requests to /api/** are available to all authenticated users
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(googleTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(withDefaults())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {

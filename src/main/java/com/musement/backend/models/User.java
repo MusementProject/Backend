@@ -16,8 +16,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
+    private String googleId;
+
+    @Column(nullable = false)
     private String username;
+
+    @Column
+    private String nickname;
 
     @Column(nullable = false)
     private String password;
