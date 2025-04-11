@@ -34,11 +34,11 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    @Column(name = "full_name")
-    private String fullName;
-
     @Column(name = "profile_picture")
     private String profilePicture;
+
+    @Column(name = "telegram")
+    private String telegram;
 
     @ManyToMany
     @JoinTable(

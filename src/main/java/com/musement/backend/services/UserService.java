@@ -42,7 +42,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserUpdateDTO dto) {
+    public UserUpdateDTO updateUser(Long id, UserUpdateDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User with id " + id + " not found."));
 
@@ -54,12 +54,18 @@ public class UserService {
         }
 
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
-        if (dto.getEmail() != null) user.setEmail(dto.getEmail());
-        if (dto.getFullName() != null) user.setFullName(dto.getFullName());
         if (dto.getBio() != null) user.setBio(dto.getBio());
         if (dto.getProfilePicture() != null) user.setProfilePicture(dto.getProfilePicture());
+        if (dto.getNickname() != null) user.setNickname(dto.getNickname());
+        if (dto.getTelegram() != null) user.setTelegram(dto.getTelegram());
 
-        return userRepository.save(user);
+        User updatedUser = userRepository.save(user);
+        UserUpdateDTO userUpdateDTO = new UserUpdateDTO();
+        userUpdateDTO.setUsername(updatedUser.getUsername());
+        userUpdateDTO.setNickname(updatedUser.getNickname());
+        userUpdateDTO.setBio(updatedUser.getBio());
+        userUpdateDTO.setTelegram(updatedUser.getTelegram());
+        return userUpdateDTO;
     }
 
     public void deleteUser(Long id) {
