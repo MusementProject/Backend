@@ -26,12 +26,23 @@ public class FriendshipController {
         return friendshipService.getFriend(userId, friendId);
     }
 
+    @GetMapping("/getFollowers/{user_id}")
+    public List<FriendDTO> getFollowers(@PathVariable("user_id") Long userId){
+        return friendshipService.getFollowers(userId);
+    }
+
+    @GetMapping("/getFollowing/{user_id}")
+    public List<FriendDTO> getFollowing(@PathVariable("user_id") Long userId){
+        return friendshipService.getFollowing(userId);
+    }
+
     @PostMapping("/add/{user_id}/{friend_id}")
     public FriendDTO addFriend(@PathVariable("user_id") Long userId, @PathVariable("friend_id") Long friendId){
         return friendshipService.addFriend(userId, friendId);
     }
 
-    @DeleteMapping("/delete")
-    public FriendDTO deleteFriend(){return null;}
-
+    @DeleteMapping("/delete/{user_id}/{friend_id}")
+    public Boolean deleteFriend(@PathVariable("user_id") Long userId, @PathVariable("friend_id") Long friendId){
+        return friendshipService.deleteFriend(userId, friendId);
+    }
 }

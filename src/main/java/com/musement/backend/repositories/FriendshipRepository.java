@@ -26,9 +26,27 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
            "(f.user.id = :userId AND f.friend.id = :friendId AND f.accepted = false)")
     Optional<Friendship> findRequest(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
+    @Query("SELECT f FROM Friendship f WHERE " +
+        "f.user.id = :userId AND f.friend.id = :friendId")
+    Optional<Friendship> findRecord(@Param("userId") Long userId, @Param("friendId") Long friendId);
+
+    @Query("SELECT f FROM Friendship f WHERE " +
+            "f.friend.id = :userId AND f.accepted = false")
+    List<Friendship> getAllFollowers(@Param("userId") Long userId);
+
+    @Query("SELECT f FROM Friendship f WHERE " +
+            "f.user.id = :userId AND f.accepted = false")
+    List<Friendship> getAllFollowing(@Param("userId") Long userId);
+
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Friendship f SET f.accepted = true WHERE " +
+    @Query("UPDATE Friendship f SET f.accepted = :status WHERE " +
             "f.user.id = :userId AND f.friend.id = :friendId")
-    int acceptRequest(@Param("userId") Long userId, @Param("friendId") Long friendId);
+    int setFriendshipStatus(@Param("userId") Long userId, @Param("friendId") Long friendId, @Param("status") boolean status);
+
+    @Transactional
+    @Modifying
+    @Query("Delete FROM Friendship f WHERE " +
+            "f.user.id = :userId AND f.friend.id = :friendId")
+    int deleteFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);
 }
