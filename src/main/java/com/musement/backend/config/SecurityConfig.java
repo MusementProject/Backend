@@ -26,6 +26,9 @@ public class SecurityConfig {
     }
 
     @Autowired
+    private JwtTokenFilter jwtFilter;
+
+    @Autowired
     private GoogleTokenAuthenticationFilter googleTokenAuthenticationFilter;
 
     @Autowired
@@ -55,7 +58,10 @@ public class SecurityConfig {
                         // other requests to /api/** are available to all authenticated users
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(googleTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter,
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(googleTokenAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(withDefaults())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {
