@@ -9,6 +9,6 @@ public class UserUpdateDTO {
     private String username;
     private String email;
     private String bio;
-    private String fullName;
+    private String nickname;
     private String profilePicture;
 }

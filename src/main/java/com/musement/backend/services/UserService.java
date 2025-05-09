@@ -55,7 +55,7 @@ public class UserService {
 
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
-        if (dto.getFullName() != null) user.setFullName(dto.getFullName());
+        if (dto.getNickname() != null) user.setNickname(dto.getNickname());
         if (dto.getBio() != null) user.setBio(dto.getBio());
         if (dto.getProfilePicture() != null) user.setProfilePicture(dto.getProfilePicture());
 
