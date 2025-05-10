@@ -4,11 +4,13 @@ import com.musement.backend.dto.UserDTO;
 import com.musement.backend.dto.UserDTO;
 import com.musement.backend.models.User;
 import com.musement.backend.services.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -64,15 +66,23 @@ public class UserController {
 
     // Текущий пользователь
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getCurrent(@AuthenticationPrincipal User me) {
-        UserDTO user = new UserDTO(
-                me.getUsername(),
-                me.getEmail(),
-                me.getNickname(),
-                me.getBio(),
-                me.getProfilePicture()
+    public ResponseEntity<UserDTO> getCurrent(Principal principal) {
+        if (principal == null) {
+            // незалогиненный
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // достаём доменный User по имени из токена
+        User domainUser = userService
+                .getUserByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserDTO dto = new UserDTO(
+                domainUser.getUsername(),
+                domainUser.getEmail(),
+                domainUser.getNickname(),
+                domainUser.getBio(),
+                domainUser.getProfilePicture()
         );
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(dto);
     }
 
     // Общий GET по id, но только себе (если нужно)
@@ -90,6 +100,7 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody UserDTO dto
     ) {
+        System.out.println("Update user, controller: " + dto);
         return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 }

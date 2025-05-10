@@ -46,11 +46,6 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User with id " + id + " not found."));
 
-//        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-//        if (!user.getUsername().equals(currentUsername)) {
-//            throw new AccessDeniedException("You are not allowed to update this user");
-//        }
-
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getNickname() != null) user.setNickname(dto.getNickname());
