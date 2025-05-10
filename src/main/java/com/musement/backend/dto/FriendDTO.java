@@ -13,6 +13,6 @@ public class FriendDTO {
     private Long id;
     private String username;
     private String nickname;
-    private String userPicture;
+    private String profilePicture;
     private boolean accepted;
 }
