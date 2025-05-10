@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -60,9 +61,9 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtFilter,
                         UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(googleTokenAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(withDefaults())
+//                .addFilterBefore(googleTokenAuthenticationFilter,
+//                        UsernamePasswordAuthenticationFilter.class)
+//                .httpBasic(withDefaults())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -79,17 +80,29 @@ public class SecurityConfig {
 
     }
 
+//    @Bean
+//    public UserDetailsService userDetailsService(UserRepository userRepository) {
+//        return username -> {
+//            User userEntity = userRepository.findUserByUsername(username)
+//                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+//
+//            return org.springframework.security.core.userdetails.User.builder()
+//                    .username(userEntity.getUsername())
+//                    .password(userEntity.getPassword())
+//                    .roles("USER")
+//                    .build();
+//        };
+//    }
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
-        return username -> {
-            User userEntity = userRepository.findUserByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
-
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(userEntity.getUsername())
-                    .password(userEntity.getPassword())
-                    .roles("USER")
-                    .build();
-        };
+        return username -> userRepository.findUserByUsername(username)
+                .map(user ->
+                        org.springframework.security.core.userdetails.User.builder()
+                                .username(user.getUsername())
+                                .password(user.getPassword())
+                                .roles("USER") // Укажите роли, если есть
+                                .build()
+                )
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 }

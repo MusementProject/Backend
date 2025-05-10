@@ -1,9 +1,12 @@
 package com.musement.backend.controllers;
 
-import com.musement.backend.dto.UserUpdateDTO;
+import com.musement.backend.dto.UserDTO;
+import com.musement.backend.dto.UserDTO;
 import com.musement.backend.models.User;
 import com.musement.backend.services.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,11 +51,6 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(user));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO user) {
-        return ResponseEntity.ok(userService.updateUser(id, user));
-    }
-
     @DeleteMapping("/id/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
@@ -62,5 +60,36 @@ public class UserController {
     @GetMapping("/searchByUsername")
     public List<User> searchUsersByUsername(@RequestParam String username) {
         return userService.searchByUsername(username);
+    }
+
+    // Текущий пользователь
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrent(@AuthenticationPrincipal User me) {
+        UserDTO user = new UserDTO(
+                me.getUsername(),
+                me.getEmail(),
+                me.getNickname(),
+                me.getBio(),
+                me.getProfilePicture()
+        );
+        return ResponseEntity.ok(user);
+    }
+
+    // Общий GET по id, но только себе (если нужно)
+    @PreAuthorize("#id == principal.id")
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id)
+                .orElseThrow(() -> new RuntimeException("User not found")));
+    }
+
+
+    @PreAuthorize("#id == principal.id")
+    @PatchMapping("/{id}")
+    public ResponseEntity<User> update(
+            @PathVariable Long id,
+            @RequestBody UserDTO dto
+    ) {
+        return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 }

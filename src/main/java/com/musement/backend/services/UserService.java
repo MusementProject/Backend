@@ -1,6 +1,6 @@
 package com.musement.backend.services;
 
-import com.musement.backend.dto.UserUpdateDTO;
+import com.musement.backend.dto.UserDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
@@ -42,16 +42,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, UserUpdateDTO dto) {
+    public User updateUser(Long id, UserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User with id " + id + " not found."));
 
-        // TODO: add this check (cur.user == user) everywhere
-
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!user.getUsername().equals(currentUsername)) {
-            throw new AccessDeniedException("You are not allowed to update this user");
-        }
+//        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+//        if (!user.getUsername().equals(currentUsername)) {
+//            throw new AccessDeniedException("You are not allowed to update this user");
+//        }
 
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
