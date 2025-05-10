@@ -80,19 +80,6 @@ public class SecurityConfig {
 
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService(UserRepository userRepository) {
-//        return username -> {
-//            User userEntity = userRepository.findUserByUsername(username)
-//                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
-//
-//            return org.springframework.security.core.userdetails.User.builder()
-//                    .username(userEntity.getUsername())
-//                    .password(userEntity.getPassword())
-//                    .roles("USER")
-//                    .build();
-//        };
-//    }
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> userRepository.findUserByUsername(username)
@@ -100,7 +87,7 @@ public class SecurityConfig {
                         org.springframework.security.core.userdetails.User.builder()
                                 .username(user.getUsername())
                                 .password(user.getPassword())
-                                .roles("USER") // Укажите роли, если есть
+                                .roles("USER")
                                 .build()
                 )
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));

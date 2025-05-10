@@ -64,14 +64,14 @@ public class UserController {
         return userService.searchByUsername(username);
     }
 
-    // Текущий пользователь
+    // current user
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrent(Principal principal) {
         if (principal == null) {
-            // незалогиненный
+            // if principal is null, return 401
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        // достаём доменный User по имени из токена
+        // extract user from principal
         User domainUser = userService
                 .getUserByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -85,7 +85,7 @@ public class UserController {
         return ResponseEntity.ok(dto);
     }
 
-    // Общий GET по id, но только себе (если нужно)
+    // current user, with @AuthenticationPrincipal, by id
     @PreAuthorize("#id == principal.id")
     @GetMapping("/{id}")
     public ResponseEntity<User> getById(@PathVariable Long id) {
