@@ -1,17 +1,16 @@
 package com.musement.backend.controllers;
 
 import com.musement.backend.dto.UserDTO;
-import com.musement.backend.dto.UserDTO;
 import com.musement.backend.models.User;
 import com.musement.backend.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -63,6 +62,7 @@ public class UserController {
     public List<User> searchUsersByUsername(@RequestParam String username) {
         return userService.searchByUsername(username);
     }
+
 
     // current user
     @GetMapping("/me")

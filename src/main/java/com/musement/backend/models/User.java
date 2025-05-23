@@ -44,6 +44,9 @@ public class User implements UserDetails {
     @Column(name = "profile_picture")
     private String profilePicture;
 
+    @Column(name = "telegram")
+    private String telegram;
+
     @ManyToMany
     @JoinTable(
             name = "user_concerts",

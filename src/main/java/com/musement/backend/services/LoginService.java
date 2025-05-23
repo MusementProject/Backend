@@ -52,6 +52,7 @@ public class LoginService {
         response.setId(user.getId());
         response.setUsername(user.getUsername());
         response.setEmail(user.getEmail());
+        response.setNickname(user.getNickname());
         return response;
     }
 }

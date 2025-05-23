@@ -7,13 +7,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponseDTO {
-    // TODO JWT ???
+@NoArgsConstructor
+public class FriendDTO {
     private Long id;
     private String username;
-    private String email;
     private String nickname;
-    private String token;
+    private String profilePicture;
+    private boolean accepted;
 }
