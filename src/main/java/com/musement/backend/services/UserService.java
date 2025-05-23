@@ -1,5 +1,6 @@
 package com.musement.backend.services;
 
+import com.musement.backend.dto.UserDTO;
 import com.musement.backend.dto.UserUpdateDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
@@ -42,30 +43,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public UserUpdateDTO updateUser(Long id, UserUpdateDTO dto) {
+    public User updateUser(Long id, UserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User with id " + id + " not found."));
 
-        // TODO: add this check (cur.user == user) everywhere
-
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!user.getUsername().equals(currentUsername)) {
-            throw new AccessDeniedException("You are not allowed to update this user");
-        }
-
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
+        if (dto.getEmail() != null) user.setEmail(dto.getEmail());
+        if (dto.getNickname() != null) user.setNickname(dto.getNickname());
         if (dto.getBio() != null) user.setBio(dto.getBio());
         if (dto.getProfilePicture() != null) user.setProfilePicture(dto.getProfilePicture());
-        if (dto.getNickname() != null) user.setNickname(dto.getNickname());
-        if (dto.getTelegram() != null) user.setTelegram(dto.getTelegram());
 
-        User updatedUser = userRepository.save(user);
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO();
-        userUpdateDTO.setUsername(updatedUser.getUsername());
-        userUpdateDTO.setNickname(updatedUser.getNickname());
-        userUpdateDTO.setBio(updatedUser.getBio());
-        userUpdateDTO.setTelegram(updatedUser.getTelegram());
-        return userUpdateDTO;
+        return userRepository.save(user);
     }
 
     public void deleteUser(Long id) {

@@ -10,6 +10,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 import java.util.Collections;
 
@@ -26,6 +28,7 @@ public class GoogleTokenAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private final UserRepository userRepository;
     private final GoogleConfig googleConfig;
+
     public GoogleTokenAuthenticationFilter(UserRepository userRepository) {
         this.userRepository = userRepository;
         this.googleConfig = new GoogleConfig();
@@ -35,7 +38,7 @@ public class GoogleTokenAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")){
+        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             String idToken = authHeader.substring(7);
             try {
                 GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
@@ -44,10 +47,10 @@ public class GoogleTokenAuthenticationFilter extends OncePerRequestFilter {
                         .build();
 
                 GoogleIdToken token = verifier.verify(idToken);
-                if (token != null){
+                if (token != null) {
                     GoogleIdToken.Payload payload = token.getPayload();
                     User user = userRepository.findUserByEmail(payload.getEmail()).orElse(null);
-                    if (user != null){
+                    if (user != null) {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 user.getUsername(), null, Collections.emptyList());
 
@@ -56,7 +59,7 @@ public class GoogleTokenAuthenticationFilter extends OncePerRequestFilter {
 
                     }
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

@@ -1,6 +1,6 @@
 package com.musement.backend.services;
 
-import com.musement.backend.dto.UserUpdateDTO;
+import com.musement.backend.dto.UserDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
@@ -146,7 +146,7 @@ class UserServiceTest {
         existingUser.setUsername("currentUser"); // matches the current authenticated user
         existingUser.setEmail("old@example.com");
 
-        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        UserDTO updateDTO = new UserDTO();
         updateDTO.setEmail("new@example.com");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
@@ -170,7 +170,7 @@ class UserServiceTest {
         existingUser.setUsername("otherUser"); // does not match the current authenticated user
         existingUser.setEmail("old@example.com");
 
-        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        UserDTO updateDTO = new UserDTO();
         updateDTO.setEmail("new@example.com");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
