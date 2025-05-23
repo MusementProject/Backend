@@ -1,12 +1,9 @@
 package com.musement.backend.services;
 
 import com.musement.backend.dto.UserDTO;
-import com.musement.backend.dto.UserUpdateDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
