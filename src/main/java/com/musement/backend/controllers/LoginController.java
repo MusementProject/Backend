@@ -77,7 +77,6 @@ public class LoginController {
             String jwt = jwtProvider.generateToken(response.getUsername());
             response.setToken(jwt);  // теперь генерится свой токен
 //            response.setToken(token); // было
-            System.out.println(googleConfig.getClientId());
             return ResponseEntity.ok(response);
 
         } catch (GeneralSecurityException | IOException e) {

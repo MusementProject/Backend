@@ -63,7 +63,6 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
 //                .addFilterBefore(googleTokenAuthenticationFilter,
 //                        UsernamePasswordAuthenticationFilter.class)
-//                .httpBasic(withDefaults())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
