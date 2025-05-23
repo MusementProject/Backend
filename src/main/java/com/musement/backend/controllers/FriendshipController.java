@@ -33,7 +33,7 @@ public class FriendshipController {
 
     @GetMapping("/getFollowing/{user_id}")
     public List<FriendDTO> getFollowing(@PathVariable("user_id") Long userId){
-        return friendshipService.getFollowing(userId);
+        return friendshipService.getFollowing(userId); 
     }
 
     @PostMapping("/add/{user_id}/{friend_id}")
