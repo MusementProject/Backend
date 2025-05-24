@@ -41,6 +41,9 @@ public class FriendshipService {
         return friendshipsToFriendDTO(friendships);
     }
 
+
+
+
     public FriendDTO getFriend(Long userId, Long friendId){
         if (userService.getUserById(userId).isEmpty()){
             throw new UserNotFoundException(userId);
@@ -61,7 +64,12 @@ public class FriendshipService {
             throw new UserNotFoundException(userId);
         }
         List<Friendship> followers = friendshipRepository.getAllFollowers(userId);
-        return friendshipsToFriendDTO(followers);
+        List<FriendDTO> friendsInfo = new ArrayList<>();
+        for (Friendship friendship : followers){
+            User newFriend = friendship.getUser();
+            friendsInfo.add(new FriendDTO(newFriend.getId(), newFriend.getUsername(), newFriend.getNickname(), newFriend.getProfilePicture(), false));
+        }
+        return friendsInfo;
     }
 
     public List<FriendDTO> getFollowing(Long userId){
