@@ -1,6 +1,5 @@
 package com.musement.backend.repositories;
 
-import com.musement.backend.models.Concert;
 import com.musement.backend.models.Friendship;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,11 +22,15 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     Optional<Friendship> findFriends(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     @Query("SELECT f FROM Friendship f WHERE " +
-           "(f.user.id = :userId AND f.friend.id = :friendId AND f.accepted = false)")
+            "(f.user.id = :userId AND f.friend.id = :friendId AND f.accepted = false)")
     Optional<Friendship> findRequest(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     @Query("SELECT f FROM Friendship f WHERE " +
-        "f.user.id = :userId AND f.friend.id = :friendId")
+            "(f.user.id = :userId AND f.friend.id = :friendId)")
+    Optional<Friendship> findPair(@Param("userId") Long userId, @Param("friendId") Long friendId);
+
+    @Query("SELECT f FROM Friendship f WHERE " +
+            "f.user.id = :userId AND f.friend.id = :friendId")
     Optional<Friendship> findRecord(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     @Query("SELECT f FROM Friendship f WHERE " +
