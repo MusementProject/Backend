@@ -48,4 +48,7 @@ public class User {
     )
     private Set<Concert> attendingConcerts = new HashSet<>();
 
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private Set<Playlist> playlists = new HashSet<>();
+
 }

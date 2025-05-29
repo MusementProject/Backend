@@ -6,9 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ArtistStatisticsDTO {
-    private Long userId;
+public class PlaylistInfoDTO {
     private Long artistId;
     private Artist artist;
-    private Double percent;
-}
+    private Integer count;
+} 
