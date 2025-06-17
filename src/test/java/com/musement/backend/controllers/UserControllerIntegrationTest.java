@@ -1,7 +1,7 @@
 package com.musement.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.musement.backend.dto.UserUpdateDTO;
+import com.musement.backend.dto.UserDTO;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,9 +115,9 @@ class UserControllerIntegrationTest {
         userRepository.save(user);
         Long id = userRepository.findUserByUsername("user").get().getId();
 
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO();
-        userUpdateDTO.setEmail("new_email@example.com");
-        String userUpdateJson = objectMapper.writeValueAsString(userUpdateDTO);
+        UserDTO UserDTO = new UserDTO();
+        UserDTO.setEmail("new_email@example.com");
+        String userUpdateJson = objectMapper.writeValueAsString(UserDTO);
 
         mockMvc.perform(patch("/api/users/" + id)
                         .contentType(MediaType.APPLICATION_JSON)

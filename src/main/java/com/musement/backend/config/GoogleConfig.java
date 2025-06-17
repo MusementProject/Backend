@@ -10,5 +10,5 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class GoogleConfig {
-    private String clientId = "set your client id here!!!";
+    private String clientId = "your client id";
 }
