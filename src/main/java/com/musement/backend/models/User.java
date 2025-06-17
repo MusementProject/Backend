@@ -3,6 +3,7 @@ package com.musement.backend.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -46,9 +47,28 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "concert_id")
     )
+    @JsonIgnore
     private Set<Concert> attendingConcerts = new HashSet<>();
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private Set<Playlist> playlists = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_concert_feed",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "concert_id")
+    )
+    @JsonIgnore
+    private Set<Concert> concertFeed = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_profile_concerts",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "concert_id")
+    )
+    @JsonIgnore
+    private Set<Concert> profileConcerts = new HashSet<>();
 
 }

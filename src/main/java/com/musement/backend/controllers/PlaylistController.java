@@ -1,7 +1,7 @@
 package com.musement.backend.controllers;
 
+import com.musement.backend.dto.ArtistDTO;
 import com.musement.backend.dto.PlaylistInfoDTO;
-import com.musement.backend.dto.PlaylistResponseDTO;
 import com.musement.backend.dto.PlaylistResponseDTO;
 import com.musement.backend.models.Playlist;
 import com.musement.backend.models.PlaylistArtistStat;
@@ -51,7 +51,14 @@ public class PlaylistController {
         for (PlaylistArtistStat stat : playlist.getArtistStats()) {
             PlaylistInfoDTO info = new PlaylistInfoDTO();
             info.setArtistId(stat.getArtist().getId());
-            info.setArtist(stat.getArtist());
+            
+            ArtistDTO artistDTO = new ArtistDTO();
+            artistDTO.setId(stat.getArtist().getId());
+            artistDTO.setName(stat.getArtist().getName());
+            artistDTO.setDescription(stat.getArtist().getDescription());
+            artistDTO.setImageUrl(stat.getArtist().getImageUrl());
+            info.setArtist(artistDTO);
+            
             info.setCount(stat.getTrackCount());
             infoList.add(info);
         }

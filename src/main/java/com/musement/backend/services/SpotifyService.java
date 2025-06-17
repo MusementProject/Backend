@@ -37,6 +37,7 @@ public class SpotifyService {
     private final WebClient webClient;
     private final SpotifyConfig config;
     private final SpotifyAuthInfo authInfo;
+    private final ConcertService concertService;
 
 
     @Getter
@@ -58,7 +59,8 @@ public class SpotifyService {
             UserRepository userRepository,
             ArtistStatisticsRepository artistStatisticsRepository,
             WebClient webClient,
-            SpotifyConfig config) {
+            SpotifyConfig config,
+            ConcertService concertService) {
         this.artistService = artistService;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -66,6 +68,7 @@ public class SpotifyService {
         this.webClient = webClient;
         this.config = config;
         this.authInfo = new SpotifyAuthInfo();
+        this.concertService = concertService;
     }
 
     /**
@@ -216,6 +219,7 @@ public class SpotifyService {
 
         user.getPlaylists().add(playlist);
         userRepository.save(user);
+        concertService.updateConcertFeedForUser(user);
 
         int totalTracks = playlistInfo.getArtists().size();
 

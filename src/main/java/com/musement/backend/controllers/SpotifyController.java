@@ -1,5 +1,6 @@
 package com.musement.backend.controllers;
 
+import com.musement.backend.dto.ArtistDTO;
 import com.musement.backend.dto.ArtistStatisticsDTO;
 import com.musement.backend.dto.SpotifyPlaylistRequest;
 import com.musement.backend.dto.PlaylistResponseDTO;
@@ -42,15 +43,24 @@ public class SpotifyController {
                 .filter(p -> p.getPlaylistUrl().equals(request.getPlaylistId()) && p.getTitle().equals(request.getPlaylistTitle()))
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Playlist not saved"));
+        
         PlaylistResponseDTO dto = new PlaylistResponseDTO();
         dto.setPlaylistId(playlist.getId());
         dto.setPlaylistUrl(playlist.getPlaylistUrl());
         dto.setTitle(playlist.getTitle());
+        
         List<PlaylistInfoDTO> infoList = new ArrayList<>();
         for (PlaylistArtistStat stat : playlist.getArtistStats()) {
             PlaylistInfoDTO info = new PlaylistInfoDTO();
             info.setArtistId(stat.getArtist().getId());
-            info.setArtist(stat.getArtist());
+            
+            ArtistDTO artistDTO = new ArtistDTO();
+            artistDTO.setId(stat.getArtist().getId());
+            artistDTO.setName(stat.getArtist().getName());
+            artistDTO.setDescription(stat.getArtist().getDescription());
+            artistDTO.setImageUrl(stat.getArtist().getImageUrl());
+            info.setArtist(artistDTO);
+            
             info.setCount(stat.getTrackCount());
             infoList.add(info);
         }

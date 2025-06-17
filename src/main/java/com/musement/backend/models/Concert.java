@@ -3,6 +3,7 @@ package com.musement.backend.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -29,6 +30,20 @@ public class Concert {
     @Column(nullable = false)
     private LocalDateTime date;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToMany(mappedBy = "attendingConcerts")
+    @JsonIgnore
     private Set<User> attendees;
+
+    public Concert() {}
+
+    public Concert(String title, Artist artist, String location, LocalDateTime date, String imageUrl) {
+        this.title = title;
+        this.artist = artist;
+        this.location = location;
+        this.date = date;
+        this.imageUrl = imageUrl;
+    }
 }

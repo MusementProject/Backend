@@ -1,6 +1,5 @@
 package com.musement.backend.dto;
 
-import com.musement.backend.models.Artist;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class PlaylistInfoDTO {
     private Long artistId;
-    private Artist artist;
-    private Integer count;
+    private ArtistDTO artist;
+    private int count;
 } 
