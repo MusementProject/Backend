@@ -5,22 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
+@Table(name = "playlist_artist_stat")
 @Getter
 @Setter
-@Table(name = "artist_statistics")
-public class ArtistStatistics {
+public class PlaylistArtistStat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "playlist_id", nullable = false)
+    private Playlist playlist;
 
     @ManyToOne
     @JoinColumn(name = "artist_id", nullable = false)
     private Artist artist;
 
-    @Column
-    private Double averagePercent;
-}
+    @Column(nullable = false)
+    private Integer trackCount;
+} 

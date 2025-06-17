@@ -10,5 +10,5 @@ public class ArtistStatisticsDTO {
     private Long userId;
     private Long artistId;
     private Artist artist;
-    private Integer counter;
+    private Double percent;
 }
