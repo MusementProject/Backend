@@ -12,9 +12,9 @@ import java.util.List;
 @Repository
 public interface CommentsRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT c FROM Comment WHERE " +
-            "c.concert.id = :concertId")
+    @Query("SELECT c FROM Comment c WHERE c.concert.id = :concertId")
     List<Comment> getConcertAllComments(@Param("concertId") Long concertId);
+
 
     @Query("SELECT DISTINCT c FROM Comment c JOIN c.tags t " +
             "WHERE c.concert.id = :concertId AND t IN :tags")
