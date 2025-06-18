@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -96,6 +97,7 @@ public class ConcertService {
 
         userRepository.save(user);
         concertRepository.save(concert);
+        updateConcertFeedForUser(user);
         return concert;
     }
 
@@ -109,7 +111,75 @@ public class ConcertService {
 
         userRepository.save(user);
         concertRepository.save(concert);
+        updateConcertFeedForUser(user);
         return concert;
+    }
+
+    public void initializeDefaultConcertFeed(User user) {
+        // 10 ближайших концертов, которых нет в profileConcerts
+        List<Concert> upcoming = concertRepository.findAll().stream()
+                .filter(c -> c.getDate().isAfter(java.time.LocalDateTime.now()))
+                .filter(c -> user.getProfileConcerts() == null || !user.getProfileConcerts().contains(c))
+                .sorted(java.util.Comparator.comparing(Concert::getDate))
+                .limit(10)
+                .toList();
+        user.getConcertFeed().clear();
+        user.getConcertFeed().addAll(upcoming);
+        userRepository.save(user);
+        updateConcertFeedForUser(user);
+    }
+
+    @Transactional
+    public void attendConcertAndUpdateFeed(Long userId, Long concertId) {
+        User user = getUserOrThrow(userId);
+        Concert concert = getConcertOrThrow(concertId);
+        // добавить в посещаемые (profileConcerts)
+        user.getProfileConcerts().add(concert);
+        // убрать из ленты
+        user.getConcertFeed().remove(concert);
+        // добавить к концерту
+        user.getAttendingConcerts().add(concert);
+        concert.getAttendees().add(user);
+
+        userRepository.save(user);
+        concertRepository.save(concert);
+        updateConcertFeedForUser(user);
+    }
+
+    public void updateConcertFeedForUser(User user) {
+        Set<Concert> profileConcerts = user.getProfileConcerts();
+        List<Concert> feed = user.getConcertFeed().stream()
+                .filter(c -> !profileConcerts.contains(c))
+                .toList();
+        if (feed.isEmpty()) {
+            // если лента пуста, заполняем без учета рекомендаций
+            initializeDefaultConcertFeed(user);
+            return;
+        }
+        // сортим
+        Map<Long, Integer> artistMetric = user.getPlaylists().stream()
+                .flatMap(p -> p.getArtistStats().stream())
+                .collect(java.util.stream.Collectors.groupingBy(
+                        stat -> stat.getArtist().getId(),
+                        java.util.stream.Collectors.summingInt(stat -> stat.getTrackCount())
+                ));
+
+        Map<Long, Integer> artistStats = new java.util.HashMap<>();
+        for (var stat : user.getPlaylists().stream().flatMap(p -> p.getArtistStats().stream()).toList()) {
+            Long artistId = stat.getArtist().getId();
+            artistStats.put(artistId, artistMetric.getOrDefault(artistId, 0));
+        }
+
+        List<Concert> sorted = feed.stream()
+                .sorted((a, b) -> {
+                    int mA = artistStats.getOrDefault(a.getArtist().getId(), 0);
+                    int mB = artistStats.getOrDefault(b.getArtist().getId(), 0);
+                    return Integer.compare(mB, mA);
+                })
+                .toList();
+        user.getConcertFeed().clear();
+        user.getConcertFeed().addAll(sorted);
+        userRepository.save(user);
     }
 
     private Concert getConcertOrThrow(Long id) {

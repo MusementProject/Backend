@@ -1,54 +1,52 @@
 package com.musement.backend.controllers;
 
 import com.musement.backend.dto.ArtistDTO;
-import com.musement.backend.dto.ArtistStatisticsDTO;
-import com.musement.backend.dto.SpotifyPlaylistRequest;
-import com.musement.backend.dto.PlaylistResponseDTO;
 import com.musement.backend.dto.PlaylistInfoDTO;
+import com.musement.backend.dto.PlaylistResponseDTO;
 import com.musement.backend.models.Playlist;
 import com.musement.backend.models.PlaylistArtistStat;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.PlaylistRepository;
 import com.musement.backend.repositories.UserRepository;
-import com.musement.backend.services.SpotifyService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/playlists")
-public class SpotifyController {
-
-    private final SpotifyService getPlaylistSpotifyService;
+public class PlaylistController {
     private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
 
-    public SpotifyController(SpotifyService getPlaylistSpotifyService, UserRepository userRepository, PlaylistRepository playlistRepository) {
-        this.getPlaylistSpotifyService = getPlaylistSpotifyService;
+    public PlaylistController(UserRepository userRepository, PlaylistRepository playlistRepository) {
         this.userRepository = userRepository;
         this.playlistRepository = playlistRepository;
     }
 
-    @PostMapping("/add")
-    public PlaylistResponseDTO addPlaylist(@Valid @RequestBody SpotifyPlaylistRequest request) {
-        getPlaylistSpotifyService.calculateArtistStatistics(request.getUserId(), request.getPlaylistId(), request.getPlaylistTitle())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Playlist not found"));
+    // все плейлисты для ленты плейлистов
+    @GetMapping("/user/{userId}")
+    public List<PlaylistResponseDTO> getUserPlaylists(@PathVariable Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        List<PlaylistResponseDTO> result = new ArrayList<>();
+        for (Playlist playlist : user.getPlaylists()) {
+            result.add(toPlaylistResponseDTO(playlist));
+        }
+        return result;
+    }
 
-        User user = userRepository.findById(request.getUserId()).orElseThrow();
-        Playlist playlist = user.getPlaylists().stream()
-                .filter(p -> p.getPlaylistUrl().equals(request.getPlaylistId()) && p.getTitle().equals(request.getPlaylistTitle()))
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Playlist not saved"));
-        
+    // конкретный плейлист
+    @GetMapping("/{playlistId}/stats")
+    public PlaylistResponseDTO getPlaylistStats(@PathVariable Long playlistId) {
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow();
+        return toPlaylistResponseDTO(playlist);
+    }
+
+    private PlaylistResponseDTO toPlaylistResponseDTO(Playlist playlist) {
         PlaylistResponseDTO dto = new PlaylistResponseDTO();
         dto.setPlaylistId(playlist.getId());
         dto.setPlaylistUrl(playlist.getPlaylistUrl());
         dto.setTitle(playlist.getTitle());
-        
         List<PlaylistInfoDTO> infoList = new ArrayList<>();
         for (PlaylistArtistStat stat : playlist.getArtistStats()) {
             PlaylistInfoDTO info = new PlaylistInfoDTO();
@@ -68,4 +66,4 @@ public class SpotifyController {
         dto.setPlaylistInfo(infoList);
         return dto;
     }
-}
+} 

@@ -46,4 +46,8 @@ public class ArtistService {
         artist.setName(name);
         return artistRepository.save(artist);
     }
+
+    public Artist updateArtist(Artist artist) {
+        return artistRepository.save(artist);
+    }
 }
