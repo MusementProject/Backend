@@ -92,12 +92,7 @@ public class TicketService {
 
     @Transactional
     public TicketDto replaceTicket(String username, Long ticketId, MultipartFile file) {
-        // удаляем старый + загружаем новый
         deleteTicket(username, ticketId);
-        // а затем делаем uploadTicket, но сохраним связь на тот же концерт
-        // можно оптимизировать, но для простоты:
-        // получаем концертId из удалённого
-        // ... либо разбить логику на два шага; здесь для примера просто заново
         throw new UnsupportedOperationException("Use uploadTicket() with new file");
     }
 

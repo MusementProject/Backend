@@ -38,7 +38,6 @@ public class TicketController {
         ticketService.deleteTicket(principal.getName(), id);
     }
 
-    // для замены можно либо вызывать delete+upload, либо реализовать метод replaceTicket
     @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public TicketDto replaceTicket(
             @PathVariable Long id,
