@@ -1,5 +1,6 @@
 package com.musement.backend.services;
 
+import com.musement.backend.dto.AddCommentRequest;
 import com.musement.backend.dto.CommentResponceDTO;
 import com.musement.backend.exceptions.ConcertCommentIsNotAvailable;
 import com.musement.backend.exceptions.UserNotFoundException;
@@ -26,13 +27,22 @@ public class CommentService {
         this.commentsRepository = commentsRepository;
     }
 
-    public boolean isVisitor (Long userId, Long concertId){
+    private User getUser (Long userId){
         Optional<User> user = userService.getUserById(userId);
         if (user.isEmpty()){
             throw new UserNotFoundException(userId);
         }
-        Concert concert  = concertService.getConcertById(concertId);
-        if (!user.get().getAttendingConcerts().contains(concert)){
+        return user.get();
+    }
+
+    private Concert getConcert(Long concertId){
+        return concertService.getConcertById(concertId);
+    }
+
+    public boolean isVisitor (Long userId, Long concertId){
+        User user = getUser(userId);
+        Concert concert  = getConcert(concertId);
+        if (!user.getAttendingConcerts().contains(concert)){
             return false;
         }
         return true;
@@ -54,5 +64,21 @@ public class CommentService {
             response.add(new CommentResponceDTO(comment));
         }
         return response;
+    }
+
+    public CommentResponceDTO addComment(AddCommentRequest addCommentRequest){
+        if (isVisitor(addCommentRequest.getUserId(), addCommentRequest.getConcertId())){
+            throw new ConcertCommentIsNotAvailable(addCommentRequest.getUserId(), addCommentRequest.getConcertId());
+        }
+        User user = getUser(addCommentRequest.getUserId());
+        Concert concert = getConcert(addCommentRequest.getConcertId());
+        Comment comment = new Comment();
+        comment.setConcert(concert);
+        comment.setUser(user);
+        comment.setMessage(addCommentRequest.getMessage());
+        comment.setTime(addCommentRequest.getTime());
+        comment.setTags(addCommentRequest.getTags());
+        commentsRepository.save(comment);
+        return new CommentResponceDTO(comment);
     }
 }

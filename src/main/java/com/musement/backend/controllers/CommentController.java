@@ -1,5 +1,6 @@
 package com.musement.backend.controllers;
 
+import com.musement.backend.dto.AddCommentRequest;
 import com.musement.backend.dto.CommentResponceDTO;
 import com.musement.backend.services.CommentService;
 import org.springframework.web.bind.annotation.*;
@@ -24,5 +25,10 @@ public class CommentController {
             @RequestParam("tags") List<String> tags
     ) {
         return commentService.getConcertComments(userId, concertId, tags);
+    }
+
+    @PostMapping("/add")
+    public CommentResponceDTO addCommentToConcert(@RequestBody AddCommentRequest request){
+        return commentService.addComment(request);
     }
 }
