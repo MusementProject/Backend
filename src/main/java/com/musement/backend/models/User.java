@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -53,7 +54,29 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "concert_id")
     )
+    @JsonIgnore
     private Set<Concert> attendingConcerts = new HashSet<>();
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private Set<Playlist> playlists = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_concert_feed",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "concert_id")
+    )
+    @JsonIgnore
+    private Set<Concert> concertFeed = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_profile_concerts",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "concert_id")
+    )
+    @JsonIgnore
+    private Set<Concert> profileConcerts = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

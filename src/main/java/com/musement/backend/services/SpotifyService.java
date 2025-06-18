@@ -12,6 +12,7 @@ import com.musement.backend.exceptions.SpotifyServerException;
 import com.musement.backend.exceptions.UserNotFoundException;
 import com.musement.backend.models.Artist;
 import com.musement.backend.models.ArtistStatistics;
+import com.musement.backend.models.PlaylistArtistStat;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.ArtistStatisticsRepository;
 import com.musement.backend.repositories.UserRepository;
@@ -36,6 +37,7 @@ public class SpotifyService {
     private final WebClient webClient;
     private final SpotifyConfig config;
     private final SpotifyAuthInfo authInfo;
+    private final ConcertService concertService;
 
 
     @Getter
@@ -57,7 +59,8 @@ public class SpotifyService {
             UserRepository userRepository,
             ArtistStatisticsRepository artistStatisticsRepository,
             WebClient webClient,
-            SpotifyConfig config) {
+            SpotifyConfig config,
+            ConcertService concertService) {
         this.artistService = artistService;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -65,6 +68,7 @@ public class SpotifyService {
         this.webClient = webClient;
         this.config = config;
         this.authInfo = new SpotifyAuthInfo();
+        this.concertService = concertService;
     }
 
     /**
@@ -88,12 +92,16 @@ public class SpotifyService {
         for (PlaylistTrackObject trackObject : playlist.getItems()) {
             for (com.musement.backend.dto.SpotifyInfo.Artist artistSpotify : trackObject.getTrack().getArtists()) {
                 String artistName = artistSpotify.getName();
-                Artist artist = new Artist();
+                com.musement.backend.models.Artist artist = artistService.findOrCreateArtist(artistName);
 
-                Long artistId = artistService.findOrCreateArtist(artistName).getId();
-                artist.setId(artistId);
-
-                artist.setName(artistName);
+                if (artist.getImageUrl() == null || artist.getImageUrl().isEmpty()) {
+                    com.musement.backend.dto.SpotifyInfo.Artist fullArtist = fetchFullArtist(artistSpotify.getId());
+                    if (fullArtist.getImages() != null && !fullArtist.getImages().isEmpty()) {
+                        String imageUrl = fullArtist.getImages().get(0).getUrl();
+                        artist.setImageUrl(imageUrl);
+                        artistService.updateArtist(artist);
+                    }
+                }
                 artists.add(artist);
             }
         }
@@ -119,6 +127,20 @@ public class SpotifyService {
                     throw new SpotifyServerException(clientResponse.toString());
                 })
                 .bodyToMono(Playlist.class);
+    }
+
+    private com.musement.backend.dto.SpotifyInfo.Artist fetchFullArtist(String spotifyArtistId) {
+        try {
+            return webClient
+                    .get()
+                    .uri("/v1/artists/{id}", spotifyArtistId)
+                    .header("Authorization", "Bearer " + authInfo.getAccessToken())
+                    .retrieve()
+                    .bodyToMono(com.musement.backend.dto.SpotifyInfo.Artist.class)
+                    .block();
+        } catch (Exception e) {
+            return new com.musement.backend.dto.SpotifyInfo.Artist();
+        }
     }
 
     public Optional<Playlist> getPlaylistInfo(String playlistId) {
@@ -168,45 +190,87 @@ public class SpotifyService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        Optional<PlaylistFromSpotifyDTO> playlist = getPlaylistFromSpotify(playlistId, playlistTitle);
-        if (playlist.isEmpty()) {
+        Optional<PlaylistFromSpotifyDTO> playlistOpt = getPlaylistFromSpotify(playlistId, playlistTitle);
+        if (playlistOpt.isEmpty()) {
             return Optional.empty();
         }
-        PlaylistFromSpotifyDTO playlistInfo = playlist.get();
+        PlaylistFromSpotifyDTO playlistInfo = playlistOpt.get();
 
-        // key - artistId, value - dto
-        Map<Long, ArtistStatisticsDTO> artistStatisticsMap = new HashMap<>();
+        com.musement.backend.models.Playlist playlist = new com.musement.backend.models.Playlist();
+        playlist.setTitle(playlistTitle);
+        playlist.setOwner(user);
+        playlist.setPlaylistUrl(playlistId);
 
+        // кол-во песен каждого артиста
+        Map<Long, PlaylistArtistStat> artistStatMap = new HashMap<>();
         for (Artist artist : playlistInfo.getArtists()) {
-            Long artistId = artist.getId();
-            ArtistStatistics stat = artistStatisticsRepository.findByUserIdAndArtistId(userId, artistId);
-
-            // if artist is not in the map for this user
+            PlaylistArtistStat stat = artistStatMap.get(artist.getId());
             if (stat == null) {
-                stat = new ArtistStatistics();
+                stat = new PlaylistArtistStat();
                 stat.setArtist(artist);
-                stat.setUser(user);
-                stat.setCounter(1);
-
+                stat.setPlaylist(playlist);
+                stat.setTrackCount(1);
+                artistStatMap.put(artist.getId(), stat);
             } else {
-                stat.setCounter(stat.getCounter() + 1);
-            }
-
-            artistStatisticsRepository.save(stat);
-
-            // update the answer map
-            ArtistStatisticsDTO dto = artistStatisticsMap.get(artistId);
-            if (dto == null) {
-                dto = new ArtistStatisticsDTO();
-                dto.setArtistId(artistId);
-                dto.setArtist(artist);
-                dto.setCounter(stat.getCounter());
-                dto.setUserId(userId);
-                artistStatisticsMap.put(artistId, dto);
-            } else {
-                dto.setCounter(dto.getCounter() + 1);
+                stat.setTrackCount(stat.getTrackCount() + 1);
             }
         }
-        return Optional.of(new ArrayList<>(artistStatisticsMap.values()));
+        playlist.setArtistStats(new HashSet<>(artistStatMap.values()));
+
+        user.getPlaylists().add(playlist);
+        userRepository.save(user);
+        concertService.updateConcertFeedForUser(user);
+
+        int totalTracks = playlistInfo.getArtists().size();
+
+        // процент песен артиста
+        Map<Long, Double> artistPercents = new HashMap<>();
+        for (PlaylistArtistStat stat : artistStatMap.values()) {
+            double percent = 100.0 * stat.getTrackCount() / totalTracks;
+            artistPercents.put(stat.getArtist().getId(), percent);
+        }
+
+        // пересчет метрики
+        for (PlaylistArtistStat stat : artistStatMap.values()) {
+            Long artistId = stat.getArtist().getId();
+            ArtistStatistics artistStatistics = artistStatisticsRepository.findByUserIdAndArtistId(userId, artistId);
+            if (artistStatistics == null) {
+                artistStatistics = new ArtistStatistics();
+                artistStatistics.setUser(user);
+                artistStatistics.setArtist(stat.getArtist());
+                artistStatistics.setAveragePercent(artistPercents.get(artistId));
+            } else {
+                int count = getUserPlaylistCountWithArtist(user, stat.getArtist());
+                double sumPercents = artistStatistics.getAveragePercent() * count;
+                sumPercents += artistPercents.get(artistId);
+                int newCount = count + 1;
+                artistStatistics.setAveragePercent(sumPercents / newCount);
+            }
+            artistStatisticsRepository.save(artistStatistics);
+        }
+
+        List<ArtistStatisticsDTO> result = new ArrayList<>();
+        for (PlaylistArtistStat stat : artistStatMap.values()) {
+            ArtistStatisticsDTO dto = new ArtistStatisticsDTO();
+            dto.setArtistId(stat.getArtist().getId());
+            dto.setArtist(stat.getArtist());
+            dto.setPercent(stat.getTrackCount() * 100.0 / totalTracks);
+            result.add(dto);
+        }
+        return Optional.of(result);
+    }
+
+    // сколько плейлистов с конкретным артистом (для пересчета метрики)
+    private int getUserPlaylistCountWithArtist(User user, Artist artist) {
+        int count = 0;
+        for (com.musement.backend.models.Playlist playlist : user.getPlaylists()) {
+            for (PlaylistArtistStat stat : playlist.getArtistStats()) {
+                if (stat.getArtist().getId().equals(artist.getId())) {
+                    count++;
+                    break;
+                }
+            }
+        }
+        return count;
     }
 }

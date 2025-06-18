@@ -50,6 +50,8 @@ public class SecurityConfig {
                         // get requests to /api/** are available to all authenticated users
                         .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
 
+                        // allow attend for authenticated users
+                        .requestMatchers(HttpMethod.POST, "/api/concerts/attend").authenticated()
                         // concert management is only available to admins
                         .requestMatchers(HttpMethod.POST, "/api/concerts/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/concerts/**").hasRole("ADMIN")
