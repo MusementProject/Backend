@@ -21,10 +21,9 @@ public class CommentController {
     @GetMapping("/getAll/{user_id}/{concert_id}")
     public List<CommentResponceDTO> getConcertComments(
             @PathVariable("user_id") Long userId,
-            @PathVariable("concert_id") Long concertId,
-            @RequestParam("tags") List<String> tags
+            @PathVariable("concert_id") Long concertId
     ) {
-        return commentService.getConcertComments(userId, concertId, tags);
+        return commentService.getConcertComments(userId, concertId);
     }
 
     @PostMapping("/add")

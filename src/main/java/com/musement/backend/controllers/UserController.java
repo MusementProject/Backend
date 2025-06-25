@@ -37,13 +37,6 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-//    @GetMapping("/id/{id}")
-//    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-//        return userService.getUserById(id)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-
     @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email)
@@ -99,7 +92,7 @@ public class UserController {
 
 
     @PreAuthorize("#id == principal.id")
-    @PatchMapping("/{id}")
+    @PatchMapping("id/{id}")
     public ResponseEntity<User> update(
             @PathVariable Long id,
             @RequestBody UserDTO dto

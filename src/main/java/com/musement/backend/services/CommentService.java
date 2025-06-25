@@ -48,17 +48,13 @@ public class CommentService {
         return true;
     }
 
-    public List<CommentResponceDTO> getConcertComments(Long userId, Long concertId, List<String> tags){
+    public List<CommentResponceDTO> getConcertComments(Long userId, Long concertId){
         if (!isVisitor(userId, concertId)){
             throw new ConcertCommentIsNotAvailable(userId, concertId);
         }
 
         List<Comment> comments = null;
-        if (tags.isEmpty()){
-            comments = commentsRepository.getConcertAllComments(concertId);
-        }else{
-            comments = commentsRepository.findByConcertIdAndTagsIn(concertId, tags);
-        }
+        comments = commentsRepository.getConcertAllComments(concertId);
         List<CommentResponceDTO> response = new ArrayList<>();
         for (Comment comment : comments){
             response.add(new CommentResponceDTO(comment));

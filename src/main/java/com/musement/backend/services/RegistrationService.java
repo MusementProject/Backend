@@ -23,9 +23,6 @@ public class RegistrationService {
     }
 
     public RegistrationResponseDTO register(RegistrationRequestDTO request) throws UserAlreadyExistsException {
-//        if (userRepository.findUserByUsername(request.getUsername()).isPresent()) {
-//            throw new UserAlreadyExistsException("Username already exists");
-//        }
         if (userRepository.findUserByEmail(request.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
         }
@@ -43,7 +40,7 @@ public class RegistrationService {
         return response;
     }
 
-    private  void indexUser(User user){
+    public  void indexUser(User user){
         UserDocument doc = new UserDocument();
         doc.setId(user.getId());
         doc.setUsername(user.getUsername());
