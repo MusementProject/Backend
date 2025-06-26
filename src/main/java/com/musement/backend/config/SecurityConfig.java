@@ -52,6 +52,10 @@ public class SecurityConfig {
 
                         // allow attend for authenticated users
                         .requestMatchers(HttpMethod.POST, "/api/concerts/attend").authenticated()
+                        // allow wishlist operations for authenticated users
+                        .requestMatchers(HttpMethod.POST, "/api/concerts/wishlist").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/concerts/wishlist_to_attending").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/concerts/wishlist").authenticated()
                         // concert management is only available to admins
                         .requestMatchers(HttpMethod.POST, "/api/concerts/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/concerts/**").hasRole("ADMIN")
