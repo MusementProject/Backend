@@ -1,7 +1,9 @@
 package com.musement.backend.controllers;
 
+import com.musement.backend.documents.UserDocument;
 import com.musement.backend.dto.UserDTO;
 import com.musement.backend.models.User;
+import com.musement.backend.services.UserSearchService;
 import com.musement.backend.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,11 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
+    private final UserSearchService userSearchService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserSearchService userSearchService) {
         this.userService = userService;
+        this.userSearchService = userSearchService;
     }
 
     @GetMapping
@@ -29,13 +33,6 @@ public class UserController {
     @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/id/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -59,8 +56,8 @@ public class UserController {
     }
 
     @GetMapping("/searchByUsername")
-    public List<User> searchUsersByUsername(@RequestParam String username) {
-        return userService.searchByUsername(username);
+    public List<UserDocument> searchUsers(@RequestParam("q") String query){
+        return userSearchService.searchByUsername(query);
     }
 
 
@@ -87,7 +84,7 @@ public class UserController {
 
     // current user, with @AuthenticationPrincipal, by id
     @PreAuthorize("#id == principal.id")
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<User> getById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id)
                 .orElseThrow(() -> new RuntimeException("User not found")));
@@ -95,7 +92,7 @@ public class UserController {
 
 
     @PreAuthorize("#id == principal.id")
-    @PatchMapping("/{id}")
+    @PatchMapping("id/{id}")
     public ResponseEntity<User> update(
             @PathVariable Long id,
             @RequestBody UserDTO dto

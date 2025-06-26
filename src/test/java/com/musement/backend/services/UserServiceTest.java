@@ -4,6 +4,7 @@ import com.musement.backend.dto.UserDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
+import com.musement.backend.repositories.UserSearchRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 class UserServiceTest {
     private UserRepository userRepository;
+    private UserSearchRepository userSearchRepository;
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
@@ -30,9 +32,10 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
+        userSearchRepository = Mockito.mock(UserSearchRepository.class);
         passwordEncoder = Mockito.mock(PasswordEncoder.class);
 
-        userService = new UserService(userRepository, passwordEncoder);
+        userService = new UserService(userRepository, userSearchRepository,  passwordEncoder);
 
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("currentUser", "password"));
