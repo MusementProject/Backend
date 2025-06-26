@@ -103,13 +103,13 @@ public class ConcertController {
     public List<ConcertDTO> getConcertFeed(@PathVariable Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
 
-        // все концерты, на которые не идем
         Set<Concert> profileConcerts = user.getProfileConcerts();
+        Set<Concert> wishlistConcerts = user.getWishlistConcerts();
         List<Concert> allAvailable = concertRepository.findAll().stream()
             .filter(c -> !profileConcerts.contains(c))
+            .filter(c -> !wishlistConcerts.contains(c))
             .toList();
 
-        // для сорта
         Map<Long, Integer> artistMetric = user.getPlaylists().stream()
             .flatMap(p -> p.getArtistStats().stream())
             .collect(java.util.stream.Collectors.groupingBy(
@@ -137,7 +137,7 @@ public class ConcertController {
         }
 
         return result.stream()
-            .map(this::toDTO)
+            .map(concert -> toDTO(concert, userId))
             .toList();
     }
 
@@ -146,7 +146,7 @@ public class ConcertController {
         User user = userRepository.findById(userId).orElseThrow();
         return user.getProfileConcerts().stream()
                 .sorted(Comparator.comparing(Concert::getDate))
-                .map(this::toDTO)
+                .map(concert -> toDTO(concert, userId))
                 .collect(Collectors.toList());
     }
 
@@ -155,7 +155,36 @@ public class ConcertController {
         concertService.attendConcertAndUpdateFeed(userId, concertId);
     }
 
-    private ConcertDTO toDTO(Concert concert) {
+    @PostMapping("/wishlist")
+    public void addToWishlist(@RequestParam Long userId, @RequestParam Long concertId) {
+        concertService.addToWishlist(userId, concertId);
+    }
+
+    @DeleteMapping("/wishlist")
+    public void removeFromWishlist(@RequestParam Long userId, @RequestParam Long concertId) {
+        concertService.removeFromWishlist(userId, concertId);
+    }
+
+    @GetMapping("/wishlist/{userId}")
+    public List<ConcertDTO> getWishlistConcerts(@PathVariable Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        return user.getWishlistConcerts().stream()
+                .sorted(Comparator.comparing(Concert::getDate))
+                .map(concert -> toDTO(concert, userId))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{concertId}/wishlist_user/{userId}")
+    public boolean isUserWishlistingConcert(@PathVariable Long concertId, @PathVariable Long userId) {
+        return concertService.isUserWishlistingConcert(concertId, userId);
+    }
+
+    @PostMapping("/wishlist_to_attending")
+    public void moveFromWishlistToAttending(@RequestParam Long userId, @RequestParam Long concertId) {
+        concertService.moveFromWishlistToAttending(userId, concertId);
+    }
+
+    private ConcertDTO toDTO(Concert concert, Long userId) {
         ConcertDTO dto = new ConcertDTO();
         dto.setId(concert.getId());
         dto.setArtistId(concert.getArtist().getId());
@@ -163,6 +192,8 @@ public class ConcertController {
         dto.setImageUrl(concert.getImageUrl());
         dto.setLocation(concert.getLocation());
         dto.setDate(concert.getDate());
+        dto.setAttending(concertService.isUserAttendingConcert(concert.getId(), userId));
+        dto.setWishlisted(concertService.isUserWishlistingConcert(concert.getId(), userId));
         return dto;
     }
 }

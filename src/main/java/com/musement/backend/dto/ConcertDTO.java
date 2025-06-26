@@ -13,4 +13,6 @@ public class ConcertDTO {
     private String imageUrl;
     private String location;
     private LocalDateTime date;
+    private boolean attending;
+    private boolean wishlisted;
 } 
