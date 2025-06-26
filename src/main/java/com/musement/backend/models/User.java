@@ -57,6 +57,15 @@ public class User implements UserDetails {
     @JsonIgnore
     private Set<Concert> attendingConcerts = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_wishlist_concerts",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "concert_id")
+    )
+    @JsonIgnore
+    private Set<Concert> wishlistConcerts = new HashSet<>();
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private Set<Playlist> playlists = new HashSet<>();
 

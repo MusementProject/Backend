@@ -67,7 +67,6 @@ public class ConcertService {
         Concert concert = getConcertOrThrow(id);
 
         for (User attendee : concert.getAttendees()) {
-            // remove concert from user's attending concerts
             Set<Concert> attendingConcerts = new HashSet<>(attendee.getAttendingConcerts());
             attendingConcerts.remove(concert);
             attendee.setAttendingConcerts(attendingConcerts);
@@ -116,10 +115,10 @@ public class ConcertService {
     }
 
     public void initializeDefaultConcertFeed(User user) {
-        // 10 ближайших концертов, которых нет в profileConcerts
         List<Concert> upcoming = concertRepository.findAll().stream()
                 .filter(c -> c.getDate().isAfter(java.time.LocalDateTime.now()))
                 .filter(c -> user.getProfileConcerts() == null || !user.getProfileConcerts().contains(c))
+                .filter(c -> user.getWishlistConcerts() == null || !user.getWishlistConcerts().contains(c))
                 .sorted(java.util.Comparator.comparing(Concert::getDate))
                 .limit(10)
                 .toList();
@@ -133,11 +132,8 @@ public class ConcertService {
     public void attendConcertAndUpdateFeed(Long userId, Long concertId) {
         User user = getUserOrThrow(userId);
         Concert concert = getConcertOrThrow(concertId);
-        // добавить в посещаемые (profileConcerts)
         user.getProfileConcerts().add(concert);
-        // убрать из ленты
         user.getConcertFeed().remove(concert);
-        // добавить к концерту
         user.getAttendingConcerts().add(concert);
         concert.getAttendees().add(user);
 
@@ -146,17 +142,53 @@ public class ConcertService {
         updateConcertFeedForUser(user);
     }
 
+    @Transactional
+    public void addToWishlist(Long userId, Long concertId) {
+        User user = getUserOrThrow(userId);
+        Concert concert = getConcertOrThrow(concertId);
+        user.getWishlistConcerts().add(concert);
+        user.getConcertFeed().remove(concert);
+        userRepository.save(user);
+        updateConcertFeedForUser(user);
+    }
+
+    @Transactional
+    public void removeFromWishlist(Long userId, Long concertId) {
+        User user = getUserOrThrow(userId);
+        Concert concert = getConcertOrThrow(concertId);
+        user.getWishlistConcerts().remove(concert);
+        userRepository.save(user);
+    }
+
+    public boolean isUserWishlistingConcert(Long concertId, Long userId) {
+        User user = getUserOrThrow(userId);
+        Concert concert = getConcertOrThrow(concertId);
+        return user.getWishlistConcerts().contains(concert);
+    }
+
+    @Transactional
+    public void moveFromWishlistToAttending(Long userId, Long concertId) {
+        User user = getUserOrThrow(userId);
+        Concert concert = getConcertOrThrow(concertId);
+        user.getWishlistConcerts().remove(concert);
+        user.getProfileConcerts().add(concert);
+        user.getAttendingConcerts().add(concert);
+        concert.getAttendees().add(user);
+        userRepository.save(user);
+        concertRepository.save(concert);
+    }
+
     public void updateConcertFeedForUser(User user) {
         Set<Concert> profileConcerts = user.getProfileConcerts();
+        Set<Concert> wishlistConcerts = user.getWishlistConcerts();
         List<Concert> feed = user.getConcertFeed().stream()
                 .filter(c -> !profileConcerts.contains(c))
+                .filter(c -> !wishlistConcerts.contains(c))
                 .toList();
         if (feed.isEmpty()) {
-            // если лента пуста, заполняем без учета рекомендаций
             initializeDefaultConcertFeed(user);
             return;
         }
-        // сортим
         Map<Long, Integer> artistMetric = user.getPlaylists().stream()
                 .flatMap(p -> p.getArtistStats().stream())
                 .collect(java.util.stream.Collectors.groupingBy(
