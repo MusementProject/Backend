@@ -6,7 +6,7 @@ A backend service for a concert discovery app that provides personalized recomme
 
 * Integrates with Spotify to import and analyze user playlists
 * Retrieves upcoming concerts through external APIs
-* Generates personalized recommendations based on artist play frequency
+* Generates personalized recommendations based on artist frequency in user playlists
 * Provides registration and authentication (JWT + Spring Security + Google OAuth2), and session management
 * Supports social features such as follows and discussion threads under concert events
 * Enables storing and managing tickets and uploading media via Cloudinary
