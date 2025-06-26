@@ -2,6 +2,7 @@ package com.musement.backend.controllers;
 
 import com.musement.backend.dto.ConcertUpdateDTO;
 import com.musement.backend.dto.ConcertDTO;
+import com.musement.backend.dto.FriendConcertDTO;
 import com.musement.backend.models.Concert;
 import com.musement.backend.models.User;
 import com.musement.backend.models.ArtistStatistics;
@@ -182,6 +183,14 @@ public class ConcertController {
     @PostMapping("/wishlist_to_attending")
     public void moveFromWishlistToAttending(@RequestParam Long userId, @RequestParam Long concertId) {
         concertService.moveFromWishlistToAttending(userId, concertId);
+    }
+
+    @GetMapping("/api/concerts/{concertId}/friends/{userId}")
+    public ResponseEntity<List<FriendConcertDTO>> getFriendsOnConcert(
+            @PathVariable Long concertId,
+            @PathVariable Long userId) {
+        List<FriendConcertDTO> friends = concertService.getFriendsOnConcert(concertId, userId);
+        return ResponseEntity.ok(friends);
     }
 
     private ConcertDTO toDTO(Concert concert, Long userId) {

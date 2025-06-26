@@ -1,6 +1,7 @@
 package com.musement.backend.services;
 
 import com.musement.backend.dto.ConcertUpdateDTO;
+import com.musement.backend.dto.FriendConcertDTO;
 import com.musement.backend.models.Artist;
 import com.musement.backend.models.Concert;
 import com.musement.backend.models.User;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -164,6 +166,49 @@ public class ConcertService {
         User user = getUserOrThrow(userId);
         Concert concert = getConcertOrThrow(concertId);
         return user.getWishlistConcerts().contains(concert);
+    }
+
+    public List<FriendConcertDTO> getFriendsOnConcert(Long concertId, Long userId) {
+        User currentUser = getUserOrThrow(userId);
+        Concert concert = getConcertOrThrow(concertId);
+        
+        List<FriendConcertDTO> friends = new ArrayList<>();
+        
+        // Получаем всех пользователей, которые идут на концерт
+        Set<User> attendingUsers = concert.getAttendees();
+        
+        for (User user : attendingUsers) {
+            if (!user.getId().equals(userId)) { // Исключаем текущего пользователя
+                boolean isAttending = true;
+                boolean isWishlisted = user.getWishlistConcerts().contains(concert);
+                
+                friends.add(new FriendConcertDTO(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getProfilePicture(),
+                    isAttending,
+                    isWishlisted
+                ));
+            }
+        }
+        
+        // Получаем всех пользователей, которые хотят пойти (но не идут)
+        for (User user : userRepository.findAll()) {
+            if (!user.getId().equals(userId) && 
+                user.getWishlistConcerts().contains(concert) && 
+                !attendingUsers.contains(user)) {
+                
+                friends.add(new FriendConcertDTO(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getProfilePicture(),
+                    false,
+                    true
+                ));
+            }
+        }
+        
+        return friends;
     }
 
     @Transactional
