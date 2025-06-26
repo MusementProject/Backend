@@ -16,4 +16,14 @@ public class RegistrationRequestDTO {
     private String email;
     @NotBlank(message = "Password is mandatory")
     private String password;
+
+    public RegistrationRequestDTO(String alice, String mail, String password) {
+        this.login = alice;
+        this.username = alice;
+        this.email = mail;
+        this.password = password;
+    }
+
+    public RegistrationRequestDTO() {
+    }
 }

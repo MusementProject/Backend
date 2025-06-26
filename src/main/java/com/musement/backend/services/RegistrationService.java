@@ -19,9 +19,6 @@ public class RegistrationService {
     }
 
     public RegistrationResponseDTO register(RegistrationRequestDTO request) throws UserAlreadyExistsException {
-//        if (userRepository.findUserByUsername(request.getUsername()).isPresent()) {
-//            throw new UserAlreadyExistsException("Username already exists");
-//        }
         if (userRepository.findUserByEmail(request.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
         }

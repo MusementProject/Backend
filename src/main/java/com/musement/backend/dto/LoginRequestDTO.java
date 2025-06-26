@@ -11,4 +11,13 @@ public class LoginRequestDTO {
     private String username;
     @NotBlank(message = "Password is mandatory")
     private String password;
+
+    public LoginRequestDTO(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public LoginRequestDTO() {
+
+    }
 }

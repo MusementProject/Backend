@@ -21,14 +21,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ConcertServiceTest {
+    private final List<Concert> concerts = new ArrayList<>();
     private ConcertRepository concertRepository;
     private UserRepository userRepository;
     private ArtistRepository artistRepository;
-
     @InjectMocks
     private ConcertService concertService;
-
-    private final List<Concert> concerts = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
