@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -32,7 +33,7 @@ public class Comment {
     private String message;
 
     @Column(nullable = false)
-    private LocalDateTime time;
+    private Date time;
 
     @Column
     private String attachedPicture;

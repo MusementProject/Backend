@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -12,6 +13,5 @@ public class AddCommentRequest {
     private Long userId;
     private Long concertId;
     private String message;
-    private LocalDateTime time;
-    private List<String> tags;
+    private Date time;
 }

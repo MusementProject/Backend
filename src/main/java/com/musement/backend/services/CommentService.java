@@ -63,7 +63,7 @@ public class CommentService {
     }
 
     public CommentResponceDTO addComment(AddCommentRequest addCommentRequest){
-        if (isVisitor(addCommentRequest.getUserId(), addCommentRequest.getConcertId())){
+        if (!isVisitor(addCommentRequest.getUserId(), addCommentRequest.getConcertId())){
             throw new ConcertCommentIsNotAvailable(addCommentRequest.getUserId(), addCommentRequest.getConcertId());
         }
         User user = getUser(addCommentRequest.getUserId());
@@ -73,7 +73,6 @@ public class CommentService {
         comment.setUser(user);
         comment.setMessage(addCommentRequest.getMessage());
         comment.setTime(addCommentRequest.getTime());
-        comment.setTags(addCommentRequest.getTags());
         commentsRepository.save(comment);
         return new CommentResponceDTO(comment);
     }

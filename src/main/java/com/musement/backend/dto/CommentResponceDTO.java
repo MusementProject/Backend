@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -17,7 +18,7 @@ import java.util.List;
 public class CommentResponceDTO {
     private User user;
     private String message;
-    private LocalDateTime time;
+    private Date time;
     private String attachedPicture;
     private List<String> tags;
 
