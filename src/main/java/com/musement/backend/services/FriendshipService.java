@@ -23,17 +23,17 @@ public class FriendshipService {
         this.userService = userService;
     }
 
-    private List<FriendDTO> friendshipsToFriendDTO(List<Friendship> friendships){
+    private List<FriendDTO> friendshipsToFriendDTO(List<Friendship> friendships) {
         List<FriendDTO> friendsInfo = new ArrayList<>();
-        for (Friendship friendship : friendships){
+        for (Friendship friendship : friendships) {
             User newFriend = friendship.getFriend();
             friendsInfo.add(new FriendDTO(newFriend.getId(), newFriend.getUsername(), newFriend.getNickname(), newFriend.getProfilePicture(), true));
         }
-        return  friendsInfo;
+        return friendsInfo;
     }
 
-    public List<FriendDTO> getAllUserFriend(Long userId){
-        if (userService.getUserById(userId).isEmpty()){
+    public List<FriendDTO> getAllUserFriend(Long userId) {
+        if (userService.getUserById(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
         List<Friendship> friendships = friendshipRepository.findAllUserFriends(userId);
@@ -41,38 +41,55 @@ public class FriendshipService {
         return friendshipsToFriendDTO(friendships);
     }
 
-    public FriendDTO getFriend(Long userId, Long friendId){
-        if (userService.getUserById(userId).isEmpty()){
+
+    public FriendDTO getFriend(Long userId, Long friendId) {
+        if (userService.getUserById(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
-        if (userService.getUserById(friendId).isEmpty()){
+        if (userService.getUserById(friendId).isEmpty()) {
             throw new UserNotFoundException(friendId);
         }
         Optional<Friendship> friendship = friendshipRepository.findFriends(userId, friendId);
-        if (friendship.isEmpty()){
+        if (friendship.isEmpty()) {
             throw new FriendsNotFound(userId, friendId);
         }
         User friend = friendship.get().getFriend();
         return new FriendDTO(friend.getId(), friend.getUsername(), friend.getNickname(), friend.getProfilePicture(), true);
     }
 
-    public List<FriendDTO> getFollowers(Long userId){
-        if (userService.getUserById(userId).isEmpty()){
+    public Boolean getPair(Long userId, Long friendId) {
+        if (userService.getUserById(userId).isEmpty()) {
+            throw new UserNotFoundException(userId);
+        }
+        if (userService.getUserById(friendId).isEmpty()) {
+            throw new UserNotFoundException(friendId);
+        }
+        Optional<Friendship> friendship = friendshipRepository.findPair(userId, friendId);
+        return friendship.isPresent();
+    }
+
+    public List<FriendDTO> getFollowers(Long userId) {
+        if (userService.getUserById(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
         List<Friendship> followers = friendshipRepository.getAllFollowers(userId);
-        return friendshipsToFriendDTO(followers);
+        List<FriendDTO> friendsInfo = new ArrayList<>();
+        for (Friendship friendship : followers) {
+            User newFriend = friendship.getUser();
+            friendsInfo.add(new FriendDTO(newFriend.getId(), newFriend.getUsername(), newFriend.getNickname(), newFriend.getProfilePicture(), false));
+        }
+        return friendsInfo;
     }
 
-    public List<FriendDTO> getFollowing(Long userId){
-        if (userService.getUserById(userId).isEmpty()){
+    public List<FriendDTO> getFollowing(Long userId) {
+        if (userService.getUserById(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
         List<Friendship> followers = friendshipRepository.getAllFollowing(userId);
         return friendshipsToFriendDTO(followers);
     }
 
-    private FriendDTO addNewRequest(Long userId, Long friendId){
+    private FriendDTO addNewRequest(Long userId, Long friendId) {
         Friendship newFriendsRequest = new Friendship();
         User user = userService.getUserById(userId).get();
         User friend = userService.getUserById(friendId).get();
@@ -84,9 +101,8 @@ public class FriendshipService {
     }
 
 
-
     @Transactional
-    private FriendDTO acceptFriend(Long userId, Long friendId){
+    private FriendDTO acceptFriend(Long userId, Long friendId) {
         friendshipRepository.setFriendshipStatus(friendId, userId, true);
         Friendship newFriendship = new Friendship();
         User user = userService.getUserById(userId).get();
@@ -99,39 +115,39 @@ public class FriendshipService {
     }
 
 
-    public FriendDTO addFriend(Long userId, Long friendId){
-        if (userService.getUserById(userId).isEmpty()){
+    public FriendDTO addFriend(Long userId, Long friendId) {
+        if (userService.getUserById(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
-        if (userService.getUserById(friendId).isEmpty()){
+        if (userService.getUserById(friendId).isEmpty()) {
             throw new UserNotFoundException(friendId);
         }
 
         Optional<Friendship> possibleFriendship = friendshipRepository.findFriends(userId, friendId);
-        if(possibleFriendship.isPresent()){
+        if (possibleFriendship.isPresent()) {
             User friend = possibleFriendship.get().getFriend();
             return new FriendDTO(friend.getId(), friend.getUsername(), friend.getNickname(), friend.getProfilePicture(), possibleFriendship.get().isAccepted());
         }
         if (friendshipRepository.findRequest(friendId, userId).isEmpty()) {
             return addNewRequest(userId, friendId);
-        }else{
+        } else {
             return acceptFriend(userId, friendId);
         }
     }
 
     @Transactional
-    public Boolean deleteFriend(Long userId, Long friendId){
-        if (userService.getUserById(userId).isEmpty()){
+    public Boolean deleteFriend(Long userId, Long friendId) {
+        if (userService.getUserById(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
-        if (userService.getUserById(friendId).isEmpty()){
+        if (userService.getUserById(friendId).isEmpty()) {
             throw new UserNotFoundException(friendId);
         }
-        if (friendshipRepository.findRecord(userId, friendId).isEmpty()){
+        if (friendshipRepository.findRecord(userId, friendId).isEmpty()) {
             throw new FriendsNotFound(userId, friendId);
         }
         friendshipRepository.deleteFriend(userId, friendId);
-        if (friendshipRepository.findRecord(friendId, userId).isPresent()){
+        if (friendshipRepository.findRecord(friendId, userId).isPresent()) {
             friendshipRepository.setFriendshipStatus(friendId, userId, false);
         }
         return true;

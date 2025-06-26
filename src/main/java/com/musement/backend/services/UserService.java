@@ -1,9 +1,11 @@
 package com.musement.backend.services;
 
+import com.musement.backend.documents.UserDocument;
 import com.musement.backend.dto.UserDTO;
 import com.musement.backend.exceptions.UserAlreadyExistsException;
 import com.musement.backend.models.User;
 import com.musement.backend.repositories.UserRepository;
+import com.musement.backend.repositories.UserSearchRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +15,12 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final UserSearchRepository userSearchRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserSearchRepository userSearchRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.userSearchRepository = userSearchRepository;
         this.passwordEncoder = passwordEncoder;
     }
 

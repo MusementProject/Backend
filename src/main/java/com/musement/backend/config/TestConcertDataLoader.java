@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
 
 @Configuration
@@ -17,7 +18,7 @@ public class TestConcertDataLoader {
     @Bean
     public CommandLineRunner loadTestConcerts(ConcertRepository concertRepository, ArtistRepository artistRepository) {
         return args -> {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale.forLanguageTag("ru"));
 
             Object[][] events = new Object[][]{
                 {"28 июня 2025, 19:00", "Газпром Арена", "Leonid Agutin", "https://avatars.mds.yandex.net/get-entity_search/2102351/1132859594/SUx182_2x"},
